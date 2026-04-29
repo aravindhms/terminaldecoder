@@ -6,8 +6,6 @@
   <title>Terminal Decoder — Decode any terminal command instantly</title>
   <meta name="description" content="Paste any terminal command — Unix, Git, Terraform, Docker, Kubernetes, npm, systemctl, jq, or openssl — and get an instant, element-by-element breakdown of every flag, argument, and operator." />
   <link rel="stylesheet" href="styles.css" />
-  <!-- Apply saved theme before CSS renders to prevent flash -->
-  <script>document.documentElement.dataset.theme = localStorage.getItem('td-theme') || 'dark';</script>
 </head>
 <body>
   <div class="app">
@@ -18,13 +16,7 @@
         <div class="logo-icon">$_</div>
         <span class="logo-text">Terminal Decoder</span>
       </div>
-      <div class="header-right">
-        <p class="tagline">Decode any terminal command — Unix · Git · Terraform · Docker · Kubernetes &amp; more.</p>
-        <button id="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle theme">
-          <span class="theme-icon theme-icon--dark">☄️</span>
-          <span class="theme-icon theme-icon--light">☀️</span>
-        </button>
-      </div>
+      <p class="tagline">Decode any terminal command — Unix · Git · Terraform · Docker · Kubernetes &amp; more.</p>
     </header>
 
     <!-- Tool pill bar -->
