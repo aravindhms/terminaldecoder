@@ -395,6 +395,171 @@ const EXTRA_COMMANDS = {
       "--no-build":   "Don't build images, even if they're missing",
       "--abort-on-container-exit":"Stop all containers if any container stops"
     }
+  },
+
+  // ── AWS CLI ──────────────────────────────────────────────────────────────
+  aws: {
+    tool: "aws",
+    description: "Amazon Web Services command-line interface",
+    args: { description: "Service and subcommand (e.g., aws s3 ls, aws ec2 describe-instances)" },
+    flags: {
+      // Core services
+      "s3":              "S3 object storage commands (ls, cp, mv, rm, sync, mb, rb)",
+      "ec2":             "Elastic Compute Cloud — manage instances, AMIs, security groups",
+      "iam":             "Identity and Access Management — users, roles, policies",
+      "ecs":             "Elastic Container Service — run Docker containers at scale",
+      "eks":             "Elastic Kubernetes Service — managed Kubernetes clusters",
+      "ecr":             "Elastic Container Registry — private Docker image registry",
+      "lambda":          "Run serverless functions",
+      "cloudformation":  "Infrastructure as Code — stack create/update/delete",
+      "rds":             "Relational Database Service — managed databases",
+      "dynamodb":        "Managed NoSQL key-value and document database",
+      "sts":             "Security Token Service — assume roles, get caller identity",
+      "secretsmanager":  "Store and retrieve application secrets",
+      "ssm":             "Systems Manager — parameter store, session manager",
+      "logs":            "CloudWatch Logs — log groups, streams, insights",
+      "cloudwatch":      "Metrics, alarms, and dashboards",
+      "route53":         "DNS and domain management",
+      "elb":             "Elastic Load Balancing",
+      "vpc":             "Virtual Private Cloud networking",
+      "elbv2":           "Application and Network Load Balancers",
+      "configure":       "Set up AWS credentials and default region/output",
+      // Common s3 subcommands
+      "ls":              "List S3 buckets or objects",
+      "cp":              "Copy files to/from S3",
+      "mv":              "Move files to/from S3",
+      "rm":              "Remove S3 objects",
+      "sync":            "Sync a directory to/from S3",
+      "mb":              "Create a new S3 bucket",
+      "rb":              "Delete an S3 bucket",
+      // Global flags
+      "--profile":       "Use a named profile from ~/.aws/credentials",
+      "--region":        "Override the default AWS region",
+      "--output":        "Output format: json, yaml, text, table",
+      "--query":         "JMESPath query to filter the output",
+      "--endpoint-url":  "Override the service endpoint URL (useful for LocalStack)",
+      "--no-verify-ssl": "Disable SSL certificate verification",
+      "--dry-run":       "Check permissions without making changes",
+      "--debug":         "Show detailed debug output and HTTP calls",
+      "--no-paginate":   "Disable automatic pagination of results",
+      "--color":         "Toggle colorized output: on, off, auto",
+      "--cli-input-json":"Read parameters from a JSON file"
+    }
+  },
+
+  // ── AZURE CLI ────────────────────────────────────────────────────────────
+  az: {
+    tool: "azure",
+    description: "Microsoft Azure command-line interface",
+    args: { description: "Service group and command (e.g., az vm list, az group create)" },
+    flags: {
+      // Core service groups
+      "login":           "Authenticate to Azure (browser or service principal)",
+      "logout":          "Log out from Azure",
+      "account":         "Manage Azure subscriptions and tenants",
+      "group":           "Manage resource groups",
+      "vm":              "Manage Azure Virtual Machines",
+      "storage":         "Manage storage accounts, blobs, queues, and tables",
+      "network":         "Manage virtual networks, subnets, NICs, and NSGs",
+      "aks":             "Manage Azure Kubernetes Service clusters",
+      "acr":             "Manage Azure Container Registry",
+      "webapp":          "Manage Azure App Service web apps",
+      "functionapp":     "Manage Azure Function Apps",
+      "keyvault":        "Manage Azure Key Vault secrets, keys, and certificates",
+      "ad":              "Manage Azure Active Directory entities",
+      "role":            "Manage role-based access control (RBAC)",
+      "policy":          "Manage Azure Policy assignments and definitions",
+      "monitor":         "Manage metrics, alerts, logs, and diagnostics",
+      "devops":          "Manage Azure DevOps pipelines and repos",
+      "sql":             "Manage Azure SQL databases",
+      "cosmosdb":        "Manage Azure Cosmos DB accounts",
+      "redis":           "Manage Azure Cache for Redis",
+      "servicebus":      "Manage Azure Service Bus namespaces and queues",
+      "configure":       "Configure az CLI defaults (location, group, etc.)",
+      // Common subcommands
+      "list":            "List resources of a given type",
+      "show":            "Show details of a specific resource",
+      "create":          "Create a new resource",
+      "delete":          "Delete a resource",
+      "update":          "Update properties of a resource",
+      "start":           "Start a VM or other stoppable resource",
+      "stop":            "Stop (deallocate) a VM",
+      "restart":         "Restart a VM or web app",
+      "get-credentials": "Download kubeconfig for an AKS cluster",
+      // Global flags
+      "--resource-group": "Resource group name",
+      "-g":               "Short for --resource-group",
+      "--name":           "Resource name",
+      "-n":               "Short for --name",
+      "--location":       "Azure region (e.g., eastus, westeurope)",
+      "-l":               "Short for --location",
+      "--subscription":   "Subscription name or ID to use",
+      "--output":         "Output format: json, jsonc, yaml, table, tsv, none",
+      "-o":               "Short for --output",
+      "--query":          "JMESPath query string to filter output",
+      "--yes":            "Do not prompt for confirmation",
+      "-y":               "Short for --yes",
+      "--no-wait":        "Do not wait for long-running operations to finish",
+      "--debug":          "Show detailed debug and HTTP request logs",
+      "--verbose":        "Show verbose logging",
+      "--only-show-errors":"Only show errors (suppress warnings)"
+    }
+  },
+
+  // ── GCLOUD ───────────────────────────────────────────────────────────────
+  gcloud: {
+    tool: "gcloud",
+    description: "Google Cloud SDK command-line interface",
+    args: { description: "Service group and command (e.g., gcloud compute instances list)" },
+    flags: {
+      // Core service groups
+      "init":            "Initialise gcloud config — set account, project, region",
+      "auth":            "Manage authentication credentials and service accounts",
+      "config":          "View and set gcloud configuration properties",
+      "compute":         "Manage Google Compute Engine VMs, disks, and networks",
+      "container":       "Manage Google Kubernetes Engine (GKE) clusters",
+      "storage":         "Manage Google Cloud Storage buckets and objects (gsutil successor)",
+      "functions":       "Manage Google Cloud Functions (serverless)",
+      "run":             "Deploy and manage Cloud Run services (serverless containers)",
+      "sql":             "Manage Cloud SQL database instances",
+      "iam":             "Manage IAM policies, roles, and service accounts",
+      "projects":        "List, create, and manage GCP projects",
+      "services":        "Enable, disable, and list GCP APIs and services",
+      "pubsub":          "Manage Pub/Sub topics and subscriptions",
+      "logging":         "Read and manage Cloud Logging log entries",
+      "monitoring":      "Manage Cloud Monitoring dashboards and alert policies",
+      "builds":          "Submit and manage Cloud Build jobs",
+      "artifacts":       "Manage Artifact Registry repositories and packages",
+      "secrets":         "Manage Secret Manager secrets",
+      "dns":             "Manage Cloud DNS zones and records",
+      // auth subcommands
+      "login":           "Authenticate with a Google account via browser",
+      "activate-service-account": "Authenticate using a service account key file",
+      "list":            "List credentialed accounts",
+      "application-default": "Manage Application Default Credentials (ADC)",
+      // compute subcommands
+      "instances":       "Manage Compute Engine VM instances",
+      "disks":           "Manage persistent disks",
+      "images":          "Manage VM images",
+      "ssh":             "SSH into a Compute Engine instance",
+      "scp":             "Copy files to/from a Compute Engine instance",
+      // container subcommands
+      "clusters":        "Manage GKE clusters",
+      "get-credentials": "Fetch kubeconfig credentials for a GKE cluster",
+      // Global flags
+      "--project":       "GCP project ID to use",
+      "--region":        "Compute region (e.g., us-central1)",
+      "--zone":          "Compute zone (e.g., us-central1-a)",
+      "--account":       "Google account or service account to use",
+      "--format":        "Output format: json, yaml, table, csv, text, none",
+      "--quiet":         "Suppress interactive prompts",
+      "-q":              "Short for --quiet",
+      "--verbosity":     "Logging verbosity: debug, info, warning, error, critical, none",
+      "--configuration": "Named gcloud config to use",
+      "--impersonate-service-account": "Run as a service account (requires iam.serviceAccountTokenCreator)",
+      "--no-user-output-enabled": "Suppress all user output",
+      "--log-http":      "Log all HTTP requests and responses (for debugging)"
+    }
   }
 };
 
@@ -413,4 +578,7 @@ function mergeExtraCommands() {
   ];
   unixCmds.forEach(k => { if (COMMANDS[k] && !COMMANDS[k].tool) COMMANDS[k].tool = "unix"; });
   if (COMMANDS["docker"]) COMMANDS["docker"].tool = "docker";
+  if (COMMANDS["aws"])    COMMANDS["aws"].tool    = "aws";
+  if (COMMANDS["az"])     COMMANDS["az"].tool     = "azure";
+  if (COMMANDS["gcloud"]) COMMANDS["gcloud"].tool = "gcloud";
 }

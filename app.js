@@ -6,6 +6,9 @@ const TOOL_CATEGORIES = [
   { id: "terraform",  label: "Terraform",   icon: "◈" },
   { id: "docker",     label: "Docker",      icon: "🐳" },
   { id: "kubernetes", label: "Kubernetes",  icon: "☸" },
+  { id: "aws",        label: "AWS",         icon: "☁" },
+  { id: "azure",      label: "Azure",       icon: "△" },
+  { id: "gcloud",     label: "GCloud",      icon: "◎" },
   { id: "npm",        label: "npm",         icon: "⬡" },
   { id: "systemctl",  label: "systemctl",   icon: "⚙" },
   { id: "jq",         label: "jq",          icon: "{}" },
@@ -106,6 +109,36 @@ const TOOL_EXAMPLES = {
     { cmd: "openssl s_client -connect example.com:443 -servername example.com", label: "s_client TLS" },
     { cmd: "openssl dgst -sha256 -sign key.pem file.txt",  label: "dgst sign …" },
     { cmd: "openssl verify -CAfile ca.pem cert.pem",       label: "verify cert" }
+  ],
+  aws: [
+    { cmd: "aws s3 ls s3://my-bucket --recursive",                              label: "s3 ls bucket" },
+    { cmd: "aws s3 sync ./dist s3://my-bucket --delete",                        label: "s3 sync" },
+    { cmd: "aws ec2 describe-instances --region us-east-1 --output table",      label: "ec2 instances" },
+    { cmd: "aws ecs list-tasks --cluster prod-cluster",                         label: "ecs tasks" },
+    { cmd: "aws eks update-kubeconfig --name my-cluster --region us-east-1",    label: "eks kubeconfig" },
+    { cmd: "aws sts get-caller-identity",                                        label: "sts identity" },
+    { cmd: "aws logs tail /aws/lambda/my-fn --follow",                          label: "logs tail" },
+    { cmd: "aws secretsmanager get-secret-value --secret-id prod/db/password",  label: "get secret" }
+  ],
+  azure: [
+    { cmd: "az login",                                                           label: "az login" },
+    { cmd: "az group list --output table",                                       label: "group list" },
+    { cmd: "az vm list -g my-rg --output table",                                label: "vm list" },
+    { cmd: "az aks get-credentials -g my-rg -n my-cluster",                     label: "aks credentials" },
+    { cmd: "az storage blob upload -f app.zip --account-name mystore -c builds", label: "blob upload" },
+    { cmd: "az webapp restart -g my-rg -n my-webapp",                           label: "webapp restart" },
+    { cmd: "az keyvault secret show --vault-name my-kv --name db-password",     label: "keyvault secret" },
+    { cmd: "az acr build --registry myregistry --image app:latest .",           label: "acr build" }
+  ],
+  gcloud: [
+    { cmd: "gcloud auth login",                                                  label: "auth login" },
+    { cmd: "gcloud config set project my-project-id",                           label: "set project" },
+    { cmd: "gcloud compute instances list --format=table",                      label: "instances list" },
+    { cmd: "gcloud container clusters get-credentials my-cluster --region us-central1", label: "gke credentials" },
+    { cmd: "gcloud run deploy my-svc --image gcr.io/proj/app:latest --region us-central1", label: "cloud run deploy" },
+    { cmd: "gcloud functions deploy my-fn --runtime nodejs20 --trigger-http",   label: "functions deploy" },
+    { cmd: "gcloud storage ls gs://my-bucket",                                  label: "storage ls" },
+    { cmd: "gcloud logging read 'severity>=ERROR' --limit 50 --format=json",    label: "logging read" }
   ]
 };
 
@@ -116,7 +149,10 @@ const TOOL_COLORS = {
   terraform:  "#a78bfa",  // purple
   docker:     "#38bdf8",  // sky blue
   kubernetes: "#2dd4bf",  // teal
-  npm:        "#f87171",  // red
+  aws:        "#f59e0b",  // amber
+  azure:      "#3b82f6",  // blue
+  gcloud:     "#ef4444",  // red
+  npm:        "#f87171",  // red-light
   systemctl:  "#facc15",  // yellow
   jq:         "#c084fc",  // violet
   openssl:    "#f472b6"   // pink
@@ -125,6 +161,7 @@ const TOOL_COLORS = {
 const TOOL_LABELS = {
   unix: "Unix", git: "Git", terraform: "Terraform",
   docker: "Docker", kubernetes: "Kubernetes",
+  aws: "AWS", azure: "Azure", gcloud: "GCloud",
   npm: "npm", systemctl: "systemctl", jq: "jq", openssl: "openssl"
 };
 
@@ -230,6 +267,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tool === 'terraform')  return { url: `https://developer.hashicorp.com/terraform/cli/commands`, label: 'Terraform docs' };
       if (tool === 'docker')     return { url: `https://docs.docker.com/reference/cli/docker/`, label: 'Docker docs' };
       if (tool === 'kubernetes') return { url: `https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands/`, label: 'kubectl docs' };
+      if (tool === 'aws')        return { url: `https://awscli.amazonaws.com/v2/documentation/api/latest/index.html`, label: 'AWS CLI docs' };
+      if (tool === 'azure')      return { url: `https://learn.microsoft.com/en-us/cli/azure/reference-index`, label: 'Azure CLI docs' };
+      if (tool === 'gcloud')     return { url: `https://cloud.google.com/sdk/gcloud/reference`, label: 'gcloud reference' };
       if (tool === 'npm')        return { url: `https://docs.npmjs.com/cli/commands/npm-${v}`, label: 'npm docs' };
       if (tool === 'jq')         return { url: `https://jqlang.github.io/jq/manual/`, label: 'jq manual' };
       if (tool === 'openssl')    return { url: `https://www.openssl.org/docs/manmaster/man1/${v}.html`, label: 'OpenSSL docs' };
