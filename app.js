@@ -218,6 +218,17 @@ document.addEventListener('DOMContentLoaded', () => {
   input.addEventListener('keydown', e => { if (e.key === 'Enter') explain(); });
   results.innerHTML = getWelcomeHTML();
 
+  // ── Theme toggle ──────────────────────────────────────────────────────
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.dataset.theme || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('td-theme', next);
+    });
+  }
+
   // ── Core explain ─────────────────────────────────────────────────────
   function explain() {
     const raw = input.value.trim();
