@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terminal Decoder — Decode any terminal command instantly</title>
+  <meta name="description" content="Paste any terminal command — Unix, Git, Terraform, Docker, Kubernetes, npm, systemctl, jq, or openssl — and get an instant, element-by-element breakdown of every flag, argument, and operator." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Header -->
+    <header>
+      <div class="logo">
+        <div class="logo-icon">$_</div>
+        <span class="logo-text">Terminal Decoder</span>
+      </div>
+      <p class="tagline">Decode any terminal command — Unix · Git · Terraform · Docker · Kubernetes &amp; more.</p>
+    </header>
+
+    <!-- Tool pill bar -->
+    <nav class="tool-pill-bar" id="tool-pill-bar" aria-label="Filter by tool"></nav>
+
+    <!-- Input -->
+    <section class="input-section" aria-label="Command input">
+      <div class="input-wrapper">
+        <span class="prompt-indicator" aria-hidden="true">$</span>
+        <input
+          id="command-input"
+          type="text"
+          placeholder="e.g.  kubectl get pods -n kube-system -o wide"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="none"
+          spellcheck="false"
+          aria-label="Enter a terminal command"
+        />
+        <div class="input-actions">
+          <button class="btn-clear" id="btn-clear" aria-label="Clear input">Clear</button>
+          <button class="btn-explain" id="btn-explain" aria-label="Explain command">Explain ↵</button>
+        </div>
+      </div>
+
+      <!-- Example chips -->
+      <div class="examples-hint" aria-label="Example commands">
+        <span class="hint-label">Try:</span>
+        <div class="example-chips-wrap" id="example-chips"></div>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <main id="results" aria-live="polite" aria-label="Command explanation"></main>
+
+  </div>
+
+  <!-- Load command databases, then app logic -->
+  <script src="commands.js"></script>
+  <script src="commands-extra.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
