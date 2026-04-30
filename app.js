@@ -142,225 +142,234 @@ const TOOL_EXAMPLES = {
   ]
 };
 
-// ── Tool colour tokens ──────────────────────────────────────────────────────
-const TOOL_COLORS = {
-  unix:       "#4ade80",  // green
-  git:        "#fb923c",  // orange
-  terraform:  "#a78bfa",  // purple
-  docker:     "#38bdf8",  // sky blue
-  kubernetes: "#2dd4bf",  // teal
-  aws:        "#f59e0b",  // amber
-  azure:      "#3b82f6",  // blue
-  gcloud:     "#ef4444",  // red
-  npm:        "#f87171",  // red-light
-  systemctl:  "#facc15",  // yellow
-  jq:         "#c084fc",  // violet
-  openssl:    "#f472b6"   // pink
-};
-
-const TOOL_LABELS = {
-  unix: "Unix", git: "Git", terraform: "Terraform",
-  docker: "Docker", kubernetes: "Kubernetes",
-  aws: "AWS", azure: "Azure", gcloud: "GCloud",
-  npm: "npm", systemctl: "systemctl", jq: "jq", openssl: "openssl"
-};
-
-// ── App state ───────────────────────────────────────────────────────────────
+// ── App state & DOM cache ──────────────────────────────────────────────────
 let activeTool = "all";
+const DOM = {};
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Merge extra commands (adds Git, Terraform, kubectl, npm, etc.)
-  if (typeof mergeExtraCommands === 'function') mergeExtraCommands();
+// Initialize the application
+async function init() {
+  DOM.input      = document.getElementById('command-input');
+  DOM.results    = document.getElementById('results');
+  DOM.btnExplain = document.getElementById('btn-explain');
+  DOM.btnClear   = document.getElementById('btn-clear');
+  DOM.pillBar    = document.getElementById('tool-pill-bar');
+  DOM.chipsWrap  = document.getElementById('example-chips');
+  DOM.logoReset  = document.getElementById('logo-reset');
 
-  const input      = document.getElementById('command-input');
-  const results    = document.getElementById('results');
-  const btnExplain = document.getElementById('btn-explain');
-  const btnClear   = document.getElementById('btn-clear');
-  const pillBar    = document.getElementById('tool-pill-bar');
-  const chipsWrap  = document.getElementById('example-chips');
+  const loaded = await initParser();
+  if (!loaded) {
+    DOM.results.innerHTML = `<div class="error-msg">Error: Could not load command database. Make sure commands.json exists.</div>`;
+    return;
+  }
 
-  // ── Build pill bar ────────────────────────────────────────────────────
+  renderToolPills();
+  renderExampleChips();
+  attachEventListeners();
+  
+  DOM.results.innerHTML = getWelcomeHTML();
+  DOM.input.focus();
+}
+
+function renderToolPills() {
+  DOM.pillBar.innerHTML = '';
   TOOL_CATEGORIES.forEach(cat => {
     const btn = document.createElement('button');
-    btn.className = 'tool-pill' + (cat.id === 'all' ? ' active' : '');
+    btn.className = 'tool-pill' + (cat.id === activeTool ? ' active' : '');
     btn.dataset.tool = cat.id;
     btn.innerHTML = `<span class="pill-icon">${cat.icon}</span>${cat.label}`;
     btn.addEventListener('click', () => {
       activeTool = cat.id;
       document.querySelectorAll('.tool-pill').forEach(p => p.classList.toggle('active', p.dataset.tool === cat.id));
-      renderChips();
+      renderExampleChips();
     });
-    pillBar.appendChild(btn);
+    DOM.pillBar.appendChild(btn);
   });
+}
 
-  // ── Render example chips ──────────────────────────────────────────────
-  function renderChips() {
-    const examples = TOOL_EXAMPLES[activeTool] || TOOL_EXAMPLES.all;
-    chipsWrap.innerHTML = '';
-    examples.forEach(ex => {
-      const btn = document.createElement('button');
-      btn.className = 'example-chip';
-      btn.dataset.cmd = ex.cmd;
-      btn.textContent = ex.label;
-      btn.addEventListener('click', () => { input.value = ex.cmd; explain(); });
-      chipsWrap.appendChild(btn);
+function renderExampleChips() {
+  const examples = TOOL_EXAMPLES[activeTool] || TOOL_EXAMPLES.all;
+  DOM.chipsWrap.innerHTML = '';
+  examples.forEach(ex => {
+    const btn = document.createElement('button');
+    btn.className = 'example-chip';
+    btn.dataset.cmd = ex.cmd;
+    btn.textContent = ex.label;
+    btn.addEventListener('click', () => { 
+      DOM.input.value = ex.cmd; 
+      explain(); 
     });
-  }
-  renderChips();
-
-  // ── Events ────────────────────────────────────────────────────────────
-  btnExplain.addEventListener('click', explain);
-  btnClear.addEventListener('click', () => {
-    input.value = '';
-    results.innerHTML = getWelcomeHTML();
-    input.focus();
+    DOM.chipsWrap.appendChild(btn);
   });
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') explain(); });
-  results.innerHTML = getWelcomeHTML();
+}
 
-  // ── Core explain ─────────────────────────────────────────────────────
-  function explain() {
-    const raw = input.value.trim();
-    if (!raw) return;
-    const parsed = parseCommand(raw);
-    if (!parsed.length) {
-      results.innerHTML = `<div class="error-msg">Could not parse the command. Please try again.</div>`;
-      return;
+function attachEventListeners() {
+  DOM.btnExplain.addEventListener('click', explain);
+  DOM.btnClear.addEventListener('click', resetApp);
+  DOM.logoReset.addEventListener('click', resetApp);
+  DOM.logoReset.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      resetApp();
     }
-    renderResults(raw, parsed);
+  });
+  DOM.input.addEventListener('keydown', e => { 
+    if (e.key === 'Enter') explain(); 
+  });
+}
+
+function resetApp() {
+  DOM.input.value = '';
+  activeTool = "all";
+  renderToolPills();
+  renderExampleChips();
+  DOM.results.innerHTML = getWelcomeHTML();
+  DOM.input.focus();
+}
+
+// ── Core explain ─────────────────────────────────────────────────────
+function explain() {
+  const raw = DOM.input.value.trim();
+  if (!raw) return;
+  const parsed = parseCommand(raw);
+  if (!parsed.length) {
+    DOM.results.innerHTML = `<div class="error-msg">Could not parse the command. Please try again.</div>`;
+    return;
+  }
+  renderResults(raw, parsed);
+}
+
+// ── Render results ────────────────────────────────────────────────────
+function renderResults(raw, parsed) {
+  const legendColors = {
+    command: 'var(--accent)', flag: 'var(--green)',
+    argument: 'var(--orange)', operator: 'var(--yellow)', subcommand: 'var(--pink)'
+  };
+  const legendLabels = {
+    command: 'Command', flag: 'Flag / Option',
+    argument: 'Argument', operator: 'Operator', subcommand: 'Subcommand'
+  };
+
+  // Token bar
+  const tokenSpans = parsed.map((p, i) =>
+    `<span class="token ${p.type}" data-index="${i}" id="token-${i}">${escHtml(p.value)}</span>`
+  ).join(' ');
+
+  // Legend
+  const types = [...new Set(parsed.map(p => p.type))];
+  const legendHTML = types.map(t =>
+    `<div class="legend-item">
+      <div class="legend-dot" style="background:${legendColors[t]}"></div>
+      <span>${legendLabels[t]}</span>
+    </div>`
+  ).join('');
+
+  // Docs link helper
+  const MAN8 = new Set(['ip','ss','mount','umount','fdisk','ifconfig','iptables','sysctl','insmod','rmmod']);
+  function getDocsLink(cmd, tool) {
+    const v = cmd.toLowerCase();
+    if (tool === 'unix' || tool === 'systemctl') {
+      const sec = MAN8.has(v) ? 8 : (v === 'crontab' || v === 'journalctl' ? 1 : 1);
+      return { url: `https://man7.org/linux/man-pages/man${sec}/${v}.${sec}.html`, label: 'man page' };
+    }
+    if (tool === 'git')        return { url: `https://git-scm.com/docs/git`, label: 'Git docs' };
+    if (tool === 'terraform')  return { url: `https://developer.hashicorp.com/terraform/cli/commands`, label: 'Terraform docs' };
+    if (tool === 'docker')     return { url: `https://docs.docker.com/reference/cli/docker/`, label: 'Docker docs' };
+    if (tool === 'kubernetes') return { url: `https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands/`, label: 'kubectl docs' };
+    if (tool === 'aws')        return { url: `https://awscli.amazonaws.com/v2/documentation/api/latest/index.html`, label: 'AWS CLI docs' };
+    if (tool === 'azure')      return { url: `https://learn.microsoft.com/en-us/cli/azure/reference-index`, label: 'Azure CLI docs' };
+    if (tool === 'gcloud')     return { url: `https://cloud.google.com/sdk/gcloud/reference`, label: 'gcloud reference' };
+    if (tool === 'npm')        return { url: `https://docs.npmjs.com/cli/commands/npm-${v}`, label: 'npm docs' };
+    if (tool === 'jq')         return { url: `https://jqlang.github.io/jq/manual/`, label: 'jq manual' };
+    if (tool === 'openssl')    return { url: `https://www.openssl.org/docs/manmaster/man1/${v}.html`, label: 'OpenSSL docs' };
+    return null;
   }
 
-  // ── Render results ────────────────────────────────────────────────────
-  function renderResults(raw, parsed) {
-    const legendColors = {
-      command: 'var(--accent)', flag: 'var(--green)',
-      argument: 'var(--orange)', operator: 'var(--yellow)', subcommand: 'var(--pink)'
-    };
-    const legendLabels = {
-      command: 'Command', flag: 'Flag / Option',
-      argument: 'Argument', operator: 'Operator', subcommand: 'Subcommand'
-    };
+  // Cards
+  const cardsHTML = parsed.map((part, i) => {
+    const typeBadge = legendLabels[part.type] || part.type;
 
-    // Token bar
-    const tokenSpans = parsed.map((p, i) =>
-      `<span class="token ${p.type}" data-index="${i}" id="token-${i}">${escHtml(p.value)}</span>`
-    ).join(' ');
-
-    // Legend
-    const types = [...new Set(parsed.map(p => p.type))];
-    const legendHTML = types.map(t =>
-      `<div class="legend-item">
-        <div class="legend-dot" style="background:${legendColors[t]}"></div>
-        <span>${legendLabels[t]}</span>
-      </div>`
-    ).join('');
-
-    // Docs link helper
-    const MAN8 = new Set(['ip','ss','mount','umount','fdisk','ifconfig','iptables','sysctl','insmod','rmmod']);
-    function getDocsLink(cmd, tool) {
-      const v = cmd.toLowerCase();
-      if (tool === 'unix' || tool === 'systemctl') {
-        const sec = MAN8.has(v) ? 8 : (v === 'crontab' || v === 'journalctl' ? 1 : 1);
-        return { url: `https://man7.org/linux/man-pages/man${sec}/${v}.${sec}.html`, label: 'man page' };
-      }
-      if (tool === 'git')        return { url: `https://git-scm.com/docs/git`, label: 'Git docs' };
-      if (tool === 'terraform')  return { url: `https://developer.hashicorp.com/terraform/cli/commands`, label: 'Terraform docs' };
-      if (tool === 'docker')     return { url: `https://docs.docker.com/reference/cli/docker/`, label: 'Docker docs' };
-      if (tool === 'kubernetes') return { url: `https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands/`, label: 'kubectl docs' };
-      if (tool === 'aws')        return { url: `https://awscli.amazonaws.com/v2/documentation/api/latest/index.html`, label: 'AWS CLI docs' };
-      if (tool === 'azure')      return { url: `https://learn.microsoft.com/en-us/cli/azure/reference-index`, label: 'Azure CLI docs' };
-      if (tool === 'gcloud')     return { url: `https://cloud.google.com/sdk/gcloud/reference`, label: 'gcloud reference' };
-      if (tool === 'npm')        return { url: `https://docs.npmjs.com/cli/commands/npm-${v}`, label: 'npm docs' };
-      if (tool === 'jq')         return { url: `https://jqlang.github.io/jq/manual/`, label: 'jq manual' };
-      if (tool === 'openssl')    return { url: `https://www.openssl.org/docs/manmaster/man1/${v}.html`, label: 'OpenSSL docs' };
-      return null;
-    }
-
-    // Cards
-    const cardsHTML = parsed.map((part, i) => {
-      const typeBadge = legendLabels[part.type] || part.type;
-
-      // Combined flag: show each sub-flag as a row inside one card
-      if (part.parts && part.parts.length) {
-        const rows = part.parts.map(p => `
-          <div class="flag-part-row">
-            <code class="flag-part-name">${escHtml(p.value)}</code>
-            <span class="flag-part-desc">${escHtml(p.description)}</span>
-          </div>`).join('');
-        return `
-        <div class="card ${part.type}" data-index="${i}" id="card-${i}">
-          <div class="card-header">
-            <span class="card-badge">${typeBadge}</span>
-            <code class="card-token">${escHtml(part.value)}</code>
-          </div>
-          <div class="flag-parts">${rows}</div>
-        </div>`;
-      }
-
-      // Docs link for command cards
-      let docsHTML = '';
-      if (part.type === 'command') {
-        const link = getDocsLink(part.value, part.tool || '');
-        if (link) {
-          docsHTML = `<a class="card-man-link" href="${link.url}" target="_blank" rel="noopener">
-            <span class="card-man-icon">↗</span> ${link.label}
-          </a>`;
-        }
-      }
-
+    // Combined flag: show each sub-flag as a row inside one card
+    if (part.parts && part.parts.length) {
+      const rows = part.parts.map(p => `
+        <div class="flag-part-row">
+          <code class="flag-part-name">${escHtml(p.value)}</code>
+          <span class="flag-part-desc">${escHtml(p.description)}</span>
+        </div>`).join('');
       return `
       <div class="card ${part.type}" data-index="${i}" id="card-${i}">
         <div class="card-header">
           <span class="card-badge">${typeBadge}</span>
           <code class="card-token">${escHtml(part.value)}</code>
         </div>
-        <p class="card-desc">${escHtml(part.description)}</p>
-        ${docsHTML}
+        <div class="flag-parts">${rows}</div>
       </div>`;
-    }).join('');
-
-    results.innerHTML = `
-      <div class="legend">${legendHTML}</div>
-      <div class="command-bar">${tokenSpans}</div>
-      <div class="cards-grid">${cardsHTML}</div>
-    `;
-
-    // Hover sync
-    document.querySelectorAll('.token').forEach(tok => {
-      tok.addEventListener('mouseenter', () => highlightPair(tok.dataset.index, true));
-      tok.addEventListener('mouseleave', () => highlightPair(tok.dataset.index, false));
-    });
-    document.querySelectorAll('.card').forEach(card => {
-      card.addEventListener('mouseenter', () => highlightPair(card.dataset.index, true));
-      card.addEventListener('mouseleave', () => highlightPair(card.dataset.index, false));
-    });
-  }
-
-  function highlightPair(index, on) {
-    const tok  = document.getElementById(`token-${index}`);
-    const card = document.getElementById(`card-${index}`);
-    if (on) {
-      tok?.classList.add('active');
-      card?.classList.add('highlighted');
-      card?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } else {
-      tok?.classList.remove('active');
-      card?.classList.remove('highlighted');
     }
-  }
 
-  function escHtml(str) {
-    return String(str)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+    // Docs link for command cards
+    let docsHTML = '';
+    if (part.type === 'command') {
+      const link = getDocsLink(part.value, part.tool || '');
+      if (link) {
+        docsHTML = `<a class="card-man-link" href="${link.url}" target="_blank" rel="noopener">
+          <span class="card-man-icon">↗</span> ${link.label}
+        </a>`;
+      }
+    }
 
-  function getWelcomeHTML() {
     return `
-      <div class="welcome">
-        <div class="welcome-icon">⌨️</div>
-        <h2>Paste any terminal command above</h2>
-        <p>Unix · Git · Terraform · Docker · Kubernetes · npm · systemctl · jq · openssl</p>
-      </div>`;
+    <div class="card ${part.type}" data-index="${i}" id="card-${i}">
+      <div class="card-header">
+        <span class="card-badge">${typeBadge}</span>
+        <code class="card-token">${escHtml(part.value)}</code>
+      </div>
+      <p class="card-desc">${escHtml(part.description)}</p>
+      ${docsHTML}
+    </div>`;
+  }).join('');
+
+  DOM.results.innerHTML = `
+    <div class="legend">${legendHTML}</div>
+    <div class="command-bar">${tokenSpans}</div>
+    <div class="cards-grid">${cardsHTML}</div>
+  `;
+
+  // Hover sync
+  document.querySelectorAll('.token').forEach(tok => {
+    tok.addEventListener('mouseenter', () => highlightPair(tok.dataset.index, true));
+    tok.addEventListener('mouseleave', () => highlightPair(tok.dataset.index, false));
+  });
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mouseenter', () => highlightPair(card.dataset.index, true));
+    card.addEventListener('mouseleave', () => highlightPair(card.dataset.index, false));
+  });
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────
+function highlightPair(index, isActive) {
+  const tok = document.getElementById(`token-${index}`);
+  const crd = document.getElementById(`card-${index}`);
+  if (tok) tok.classList.toggle('active', isActive);
+  if (crd) crd.classList.toggle('active', isActive);
+  if (isActive && crd) {
+    crd.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
-});
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function getWelcomeHTML() {
+  return `
+    <div class="welcome">
+      <div class="welcome-icon">⌨️</div>
+      <h2>Paste any terminal command above</h2>
+      <p>Unix · Git · Terraform · Docker · Kubernetes · npm · systemctl · jq · openssl</p>
+    </div>`;
+}
+
+// Initializing the app
+document.addEventListener('DOMContentLoaded', init);

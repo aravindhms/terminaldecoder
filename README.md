@@ -45,9 +45,9 @@ A fast, client-side web app that breaks down terminal commands token by token, e
 terminaldecoder/
 ├── index.html          # App shell, layout, meta tags
 ├── styles.css          # Design system (CSS variables, components)
-├── commands.js         # Unix command database + tokenizer/parser
-├── commands-extra.js   # DevOps/cloud tool database + merge logic
-└── app.js              # UI logic, rendering, filtering, docs links
+├── commands.json       # Unified command database (JSON)
+├── parser.js           # Core tokenization and command analysis logic
+└── app.js              # UI logic, rendering, and filtering
 ```
 
 ---
@@ -77,24 +77,19 @@ npx serve .
 
 ## Adding a New Tool
 
-1. Open `commands-extra.js`
-2. Add an entry to `EXTRA_COMMANDS` following the existing schema:
-```js
-mytool: {
-  tool: "mytool",
-  description: "What this tool does",
-  args: { description: "What positional args mean" },
-  flags: {
+1. Open `commands.json`
+2. Add an entry to the `commands` object following the existing schema:
+```json
+"mytool": {
+  "tool": "mytool",
+  "description": "What this tool does",
+  "flags": {
     "subcommand": "Description of subcommand",
     "--flag":     "Description of flag"
   }
 }
 ```
-3. Tag it in `mergeExtraCommands()`:
-```js
-if (COMMANDS["mytool"]) COMMANDS["mytool"].tool = "mytool";
-```
-4. Add a pill to `TOOL_CATEGORIES`, a colour to `TOOL_COLORS`, a label to `TOOL_LABELS`, and example chips to `TOOL_EXAMPLES` in `app.js`
+3. Add a pill to `TOOL_CATEGORIES`, a colour to `TOOL_COLORS`, a label to `TOOL_LABELS`, and example chips to `TOOL_EXAMPLES` in `app.js`
 
 ---
 

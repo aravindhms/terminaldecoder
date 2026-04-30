@@ -117,6 +117,19 @@ header {
   background-clip: text;
 }
 
+#logo-reset {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#logo-reset:hover {
+  transform: scale(1.05);
+}
+
+#logo-reset:active {
+  transform: scale(0.95);
+}
+
 .github-link {
   display: inline-flex;
   align-items: center;

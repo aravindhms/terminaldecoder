@@ -15,7 +15,7 @@
 
     <!-- Header -->
     <header>
-      <div class="logo">
+      <div class="logo" id="logo-reset" role="button" tabindex="0" title="Reset Page">
         <div class="logo-icon">$_</div>
         <span class="logo-text">TERMINAL DECODER</span>
       </div>
@@ -61,12 +61,10 @@
 
     <!-- Results -->
     <main id="results" aria-live="polite" aria-label="Command explanation"></main>
-
   </div>
 
   <!-- Load command databases, then app logic -->
-  <script src="commands.js"></script>
-  <script src="commands-extra.js"></script>
+  <script src="parser.js"></script>
   <script src="app.js"></script>
 </body>
 
