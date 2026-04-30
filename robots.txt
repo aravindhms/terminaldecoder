@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://terminaldecoder.vercel.app/sitemap.xml
