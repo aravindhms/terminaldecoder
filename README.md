@@ -4,7 +4,7 @@
 
 A fast, client-side web app that breaks down terminal commands token by token, explaining every flag, argument, subcommand, and pipe operator. No backend, no dependencies — just open and use.
 
-🔗 **[Live Demo](https://aravindhms.github.io/terminaldecoder)** &nbsp;|&nbsp; **[GitHub](https://github.com/aravindhms/terminaldecoder)**
+🔗 **[Live Demo](https://terminaldecoder.vercel.app/)** &nbsp;|&nbsp; **[GitHub](https://github.com/aravindhms/terminaldecoder)**
 
 ---
 
