@@ -15,6 +15,7 @@ A fast, client-side web app that breaks down terminal commands token by token, e
 - **Combined flag expansion** — `-la` shows `-l` and `-a` explained line-by-line inside one card
 - **Intelligent argument guesser** — auto-labels paths, URLs, port mappings (`8080:80`), container images (`nginx:latest`), env vars (`KEY=VALUE`), file types (`.yaml`, `.pem`, `.tf`, …)
 - **Official docs link** — every command card links to its man page or official documentation
+- **Copy Summary** — generate a beautifully formatted text breakdown of any command to share or document your work
 - **Tool filter pills** — filter example chips and quickly jump to a specific ecosystem
 - **No install, no build step** — pure HTML + CSS + JavaScript
 
