@@ -65,14 +65,17 @@ terminaldecoder/
 
 ## Running Locally
 
-No build step needed — just open the file in a browser:
+No build step needed. Because the app loads its command database via `fetch`, you should use a local web server to avoid CORS restrictions:
 
 ```bash
 git clone https://github.com/aravindhms/terminaldecoder.git
 cd terminaldecoder
-# Open index.html in your browser, or serve with any static server:
+
+# Start a local server:
 npx serve .
 ```
+
+Then open the provided local URL (usually `http://localhost:3000`) in your browser.
 
 ---
 
