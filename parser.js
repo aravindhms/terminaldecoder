@@ -187,6 +187,12 @@ function guessArgument(token) {
   if (/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(:[0-9]+)?$/.test(t)) return `IPv4 address / host:port: ${t}`;
   if (/^:?\d+:\d+$/.test(t))        return `Port mapping (host:container): ${t}`;
   if (/^[A-Z_][A-Z0-9_]*=/.test(t)) return `Environment variable assignment: ${t}`;
+  // Bug E fix: crypto key specs (e.g. rsa:4096) before the container image regex
+  if (/^(rsa|ec|ed25519|dsa):\d+$/i.test(t)) return `Cryptographic key type and size: ${t}`;
+  // Bug F fix: S3, GCS, and HTTP/S URLs
+  if (/^s3:\/\//.test(t))     return `S3 bucket or object path: ${t}`;
+  if (/^gs:\/\//.test(t))     return `GCS bucket or object path: ${t}`;
+  if (/^https?:\/\//.test(t)) return `URL: ${t}`;
   if (/^[a-z0-9._/-]+:[a-z0-9._-]+$/.test(t) && !t.startsWith('-')) return `Container image reference: ${t}`;
   if (/^v?\d+\.\d+(\.\d+)?(-[a-z0-9.]+)?$/.test(t)) return `Version string: ${t}`;
   if (/[*?{}]/.test(t))  return `Glob / wildcard pattern: ${t}`;
@@ -243,7 +249,8 @@ function tokenize(input) {
       tokens.push(ch); continue;
     }
 
-    if (ch === " " || ch === "\t") {
+    // Bug G fix: treat \n and \r as whitespace so pasted multi-line commands don't fuse tokens
+    if (ch === " " || ch === "\t" || ch === "\n" || ch === "\r") {
       if (current) { tokens.push(current); current = ""; }
       continue;
     }

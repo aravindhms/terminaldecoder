@@ -256,10 +256,11 @@ function renderResults(raw, parsed) {
 
   // Legend
   const types = [...new Set(parsed.map(p => p.type))];
+  // Bug C fix: fallback colour/label so unknown future types don't render 'undefined'
   const legendHTML = types.map(t =>
     `<div class="legend-item">
-      <div class="legend-dot" style="background:${legendColors[t]}"></div>
-      <span>${legendLabels[t]}</span>
+      <div class="legend-dot" style="background:${legendColors[t] || 'var(--accent)'}"></div>
+      <span>${legendLabels[t] || t}</span>
     </div>`
   ).join('');
 
@@ -268,7 +269,7 @@ function renderResults(raw, parsed) {
   function getDocsLink(cmd, tool) {
     const v = cmd.toLowerCase();
     if (tool === 'unix' || tool === 'systemctl') {
-      const sec = MAN8.has(v) ? 8 : (v === 'crontab' || v === 'journalctl' ? 1 : 1);
+      const sec = MAN8.has(v) ? 8 : 1; // Bug B fix: inner ternary was always 1 — simplified
       return { url: `https://man7.org/linux/man-pages/man${sec}/${v}.${sec}.html`, label: 'man page' };
     }
     if (tool === 'git')        return { url: `https://git-scm.com/docs/git`, label: 'Git docs' };
@@ -286,7 +287,7 @@ function renderResults(raw, parsed) {
 
   // Cards
   const cardsHTML = parsed.map((part, i) => {
-    const typeBadge = legendLabels[part.type] || part.type;
+    const typeBadge = legendLabels[part.type] || part.type; // Bug C fix: fallback to raw type string
 
     // Combined flag: show each sub-flag as a row inside one card
     if (part.parts && part.parts.length) {
@@ -390,8 +391,8 @@ async function copyToClipboard(text, btn) {
     
     setTimeout(() => {
       btn.classList.remove('copied');
-      if (icon) icon.textContent = '📋';
-      if (label) label.textContent = 'Copy';
+      if (icon)  icon.textContent  = '\ud83d\udcdd'; // Bug A fix: reset to original icon (📝)
+      if (label) label.textContent = 'Copy Summary'; // Bug A fix: reset to original label
     }, 2000);
   } catch (err) {
     console.error('Failed to copy: ', err);
