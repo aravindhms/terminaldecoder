@@ -64,7 +64,8 @@ function parseCommand(input) {
 
         if (t.startsWith("-")) {
           // Combined short flags (-la): one card, lines inside
-          if (!t.startsWith("--") && t.length > 2) {
+          // But skip long-style single-dash flags like -out=tfplan, -auto-approve, -var-file=...
+          if (!t.startsWith("--") && t.length > 2 && !isLongFlag(t)) {
             const flagParts = t.slice(1).split("").map(c => {
               const sf = "-" + c;
               return {
@@ -99,11 +100,39 @@ function parseCommand(input) {
   return results;
 }
 
+/**
+ * Detect Terraform-style long flags using a single dash:
+ * -out=tfplan, -auto-approve, -var-file=prod.tfvars, -no-color
+ * These are NOT combined POSIX short flags and must NOT be split.
+ * Heuristics:
+ *   - Contains '=' (e.g. -out=tfplan)
+ *   - Contains '-' after the leading dash (e.g. -auto-approve)
+ *   - Starts with a digit after dash (e.g. -15 for kill signals — treat as single)
+ *   - More than 3 characters after the dash (very unlikely to be short-flag combo)
+ */
+function isLongFlag(flag) {
+  const body = flag.slice(1); // strip leading '-'
+  if (body.includes('=')) return true;   // -out=tfplan
+  if (body.includes('-')) return true;   // -auto-approve, -no-color
+  if (body.length > 3) return true;      // -json, -lock, -input are long opts
+  if (/^\d/.test(body)) return true;     // -15 (kill signal) — keep as single
+  return false;
+}
+
 function explainFlag(cmd, flag) {
   if (!window.COMMAND_DATA) return "Option flag";
   const cmdData = window.COMMAND_DATA.commands[cmd];
   if (!cmdData) return "Option flag for the command";
+
+  // Direct match
   if (cmdData.flags[flag]) return cmdData.flags[flag];
+
+  // For flags like -out=tfplan, try looking up just the key part (-out)
+  if (flag.includes('=')) {
+    const keyPart = flag.split('=')[0];
+    if (cmdData.flags[keyPart]) return cmdData.flags[keyPart];
+  }
+
   return `Flag for ${cmd} — check official docs for details`;
 }
 
