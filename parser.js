@@ -80,17 +80,26 @@ function parseCommand(input) {
           // Combined short flags (e.g. -la, -avzr): one card with sub-rows
           // Skip if this is a long-form single-dash flag for this tool
           if (!t.startsWith("--") && t.length > 2 && !isLongFlag(t, tool)) {
-            const flagParts = t.slice(1).split("").map(c => {
-              const sf = "-" + c;
-              return {
-                value: sf,
-                description: (cmd.flags && cmd.flags[sf])
-                  ? cmd.flags[sf]
-                  : `Flag for ${cmdKey} — check official docs for details`
-              };
-            });
-            results.push({ type: "flag", tool, value: t, parts: flagParts });
-            i++;
+            // CRITICAL FIX: before splitting char-by-char, check if the full flag
+            // is a direct key in this command's flags dict.
+            // e.g. find -name, find -type, find -maxdepth, ps -ef, ps -aux, wget -np
+            // These are single-dash compound/long flags — they must NOT be split.
+            if (cmd.flags && cmd.flags[t]) {
+              results.push({ type: "flag", tool, value: t, description: cmd.flags[t] });
+              i++;
+            } else {
+              const flagParts = t.slice(1).split("").map(c => {
+                const sf = "-" + c;
+                return {
+                  value: sf,
+                  description: (cmd.flags && cmd.flags[sf])
+                    ? cmd.flags[sf]
+                    : `Flag for ${cmdKey} — check official docs for details`
+                };
+              });
+              results.push({ type: "flag", tool, value: t, parts: flagParts });
+              i++;
+            }
           } else {
             results.push({ type: "flag", tool, value: t, description: explainFlag(cmdKey, t) });
             i++;

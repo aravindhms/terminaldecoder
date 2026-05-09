@@ -230,6 +230,7 @@ function resetApp() {
 function explain() {
   const raw = DOM.input.value.trim();
   if (!raw) return;
+
   const parsed = parseCommand(raw);
   if (!parsed.length) {
     DOM.results.innerHTML = `<div class="error-msg">Could not parse the command. Please try again.</div>`;
@@ -424,9 +425,9 @@ function generateSummary(raw, parsed) {
 function getWelcomeHTML() {
   return `
     <div class="welcome">
-      <div class="welcome-icon">⌨️</div>
+      <div class="welcome-icon">⚡</div>
       <h2>Paste any terminal command above</h2>
-      <p>Unix · Git · Terraform · Docker · Kubernetes · npm · systemctl · jq · openssl</p>
+      <p style="opacity: 0.6; font-size: 0.85rem">Instantly breakdown Git, Docker, K8s, and Unix commands</p>
     </div>`;
 }
 
