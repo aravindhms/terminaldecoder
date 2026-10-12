@@ -845,7 +845,7 @@ function guessArgument(token, cmdContext = null) {
   if (/\./.test(t)) return `File or path: ${t}`;
 
   // 15. Glob / wildcards
-  if (/[*?]/.test(t) || (/\{.*,.*\}/.test(t))) return `Glob / wildcard pattern: ${t}`;
+  if (/[*?]/.test(t) || (/\{[^{}]*,[^{}]*\}/.test(t))) return `Glob / wildcard pattern: ${t}`;
 
   return `Argument: ${t}`;
 }
@@ -857,7 +857,7 @@ function scanHazards(raw) {
   const lower = raw.toLowerCase().trim();
 
   // Root or broad deletion
-  if (/rm\s+-(r|f)*rf?\s+(\/\s*|\/\*|\.\s*|\.\/\*)/i.test(raw)) {
+  if (/rm\s+-(?:r|f)*rf?\s+(\/\s*|\/\*|\.\s*|\.\/\*)/i.test(raw)) {
     return {
       severity: "danger",
       title: "Extremely Destructive Command",
@@ -875,7 +875,7 @@ function scanHazards(raw) {
   }
 
   // Raw disk writing
-  if (/dd\s+.*of=\/dev\/(sd[a-z]|nvme[0-9]|hd[a-z]|disk[0-9])/i.test(raw)) {
+  if (/dd\b[^;\n|&]*\bof=\/dev\/(sd[a-z]|nvme\d|hd[a-z]|disk\d)/i.test(raw)) {
     return {
       severity: "danger",
       title: "Direct Disk Overwrite",
@@ -893,7 +893,7 @@ function scanHazards(raw) {
   }
 
   // Git force push
-  if (/git\s+push\s+.*(--force|-f\b|--force-with-lease)/i.test(raw)) {
+  if (/git\s+push\b[^;\n|&]*\b(--force|-f\b|--force-with-lease)/i.test(raw)) {
     return {
       severity: "warning",
       title: "History Rewrite: Force Push",

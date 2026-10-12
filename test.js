@@ -6,7 +6,6 @@
 const fs = require('fs');
 const assert = require('assert');
 const path = require('path');
-const vm = require('vm');
 
 // Mock browser environment for parser module
 const commandsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'commands.json'), 'utf8'));
@@ -185,20 +184,21 @@ it('should parse all built-in examples with zero fallback flags', () => {
   const appCode = fs.readFileSync(path.join(__dirname, 'app.js'), 'utf8');
   const match = appCode.match(/const TOOL_EXAMPLES = (\{[\s\S]*?\n\};)/);
   assert(match, 'Could not find TOOL_EXAMPLES in app.js');
-  const codeToRun = '(' + match[1].replace(/;$/, '') + ')';
-  const TOOL_EXAMPLES = vm.runInNewContext(codeToRun);
+
+  // Extract command strings safely without dynamic code execution
+  const cmdMatches = [...match[1].matchAll(/cmd:\s*(?:"([^"]+)"|'([^']+)')/g)];
+  const commands = cmdMatches.map(m => m[1] || m[2]);
+  assert(commands.length > 0, 'No example commands found');
 
   let missingFlags = 0;
-  for (const [cat, list] of Object.entries(TOOL_EXAMPLES)) {
-    for (const ex of list) {
-      const results = parseCommand(ex.cmd);
-      results.forEach(r => {
-        if (r.type === 'flag' && r.description && r.description.includes('check official docs for details')) {
-          console.error(`Missing flag in ${ex.cmd}: ${r.value}`);
-          missingFlags++;
-        }
-      });
-    }
+  for (const cmd of commands) {
+    const results = parseCommand(cmd);
+    results.forEach(r => {
+      if (r.type === 'flag' && r.description && r.description.includes('check official docs for details')) {
+        console.error(`Missing flag in ${cmd}: ${r.value}`);
+        missingFlags++;
+      }
+    });
   }
   assert.strictEqual(missingFlags, 0, `Found ${missingFlags} missing/fallback flags in built-in examples`);
 });

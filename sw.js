@@ -45,21 +45,24 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      const fetchPromise = fetch(event.request).then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return networkResponse;
-      }).catch(() => {
-        // Offline and network failed
-        return cachedResponse;
-      });
+    (async () => {
+      const cachedResponse = await caches.match(event.request);
 
-      return cachedResponse || fetchPromise;
-    })
+      const fetchPromise = (async () => {
+        try {
+          const networkResponse = await fetch(event.request);
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put(event.request, responseToCache);
+          }
+          return networkResponse;
+        } catch (_) {
+          return cachedResponse;
+        }
+      })();
+
+      return cachedResponse || (await fetchPromise);
+    })()
   );
 });
