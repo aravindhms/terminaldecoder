@@ -28,6 +28,10 @@ It covers **80+ CLI tools and ecosystems** out of the box — from Unix core-uti
 
 | Feature | Description |
 |---|---|
+| 🌲 **Hierarchical Subcommand Scoping** | Flags resolve within subcommand scope (e.g. `git commit -m` explains message, `git branch -m` explains rename) |
+| 🐚 **Subshell & Process Substitution AST** | Parses `$(...)`, `` `...` ``, and `<(...)` without breaking internal pipelines or redirection operators |
+| 🔮 **Smart CLI Inference for Custom Tools** | Intelligently structures any unrecognized tool (e.g. `pulumi`, `ansible`) into commands, subcommands, and flags |
+| 📲 **Offline PWA Support** | Service worker with offline caching and mobile-ready web app manifest (`sw.js` + `manifest.json`) |
 | 🎨 **Colour-coded token bar** | Each token (command, flag, argument, operator, subcommand, env var) gets a distinct colour and a paired explanation card |
 | 🚨 **Hazard & Safety Scanner** | Detects destructive commands (`rm -rf /`, fork bombs, raw disk writes, `git reset --hard`, `terraform destroy`) and warns before execution |
 | 🔗 **Shareable URLs** | Direct URL links (`?cmd=...`) let you bookmark or send decoded breakdowns directly to teammates |

@@ -1,6 +1,11 @@
 /**
- * Parser module for Terminal Decoder
- * Handles tokenization, command analysis, flag expansion, and hazard scanning
+ * Parser module for Terminal Decoder v3.0
+ * Architecture:
+ * - Hierarchical subcommand & scoped flag resolution
+ * - Data-driven schema (wrapper commands, flag conventions, typed flags)
+ * - True AST tokenization: quotes, escapes, subshells $(...), process substitutions <(...)
+ * - Smart CLI structural inference for unrecognized / custom tools
+ * - Hazard / safety scanner
  */
 
 if (typeof window === 'undefined') {
@@ -8,13 +13,8 @@ if (typeof window === 'undefined') {
 }
 window.COMMAND_DATA = window.COMMAND_DATA || null;
 
-// ── Wrapper / Prefix commands that execute another target command ──────────
-const WRAPPER_COMMANDS = new Set([
-  "sudo", "doas", "nohup", "time", "xargs", "env", "exec", "watch", "timeout", "nice", "ionice"
-]);
-
-// ── Flags known to consume the subsequent token as an argument/value ──────
-const FLAGS_EXPECTING_VALUE = new Set([
+// Fallback value-flag detection heuristic if a tool or flag is custom/unregistered
+const HEURISTIC_VALUE_FLAGS = new Set([
   "-n", "--name", "--namespace",
   "-m", "--message",
   "-p", "--port", "--publish",
@@ -27,7 +27,7 @@ const FLAGS_EXPECTING_VALUE = new Set([
   "-c", "--config", "--command",
   "-e", "--eval", "--env",
   "-d", "--data",
-  "-s", "--signal",
+  "-s", "--signal", "--stack",
   "-r", "--requirement",
   "-w", "--workspace",
   "-l", "--location",
@@ -41,8 +41,9 @@ const FLAGS_EXPECTING_VALUE = new Set([
   "--index-url", "--extra-index-url", "--max-old-space-size", "--env-file"
 ]);
 
-// Tools where single-dash flags are strictly long-form keywords (e.g. -out, -newkey)
-const STRICT_LONG_TOOLS = new Set(["terraform", "openssl"]);
+function isFallbackValueFlag(flagKey) {
+  return HEURISTIC_VALUE_FLAGS.has(flagKey);
+}
 
 /**
  * Initialize parser data from JSON
@@ -59,6 +60,57 @@ async function initParser() {
 }
 
 /**
+ * Resolve flag definition with subcommand scoping support
+ * Checks subcommand scope first, then root command flags
+ */
+function resolveFlagMeta(cmd, activeSubcommand, flagKey) {
+  if (!cmd) return null;
+
+  // 1. Try scoped subcommand flags
+  if (activeSubcommand && cmd.subcommands && cmd.subcommands[activeSubcommand] && cmd.subcommands[activeSubcommand].flags) {
+    const scoped = cmd.subcommands[activeSubcommand].flags[flagKey];
+    if (scoped) {
+      return typeof scoped === 'string'
+        ? { description: scoped, takes_arg: isFallbackValueFlag(flagKey) }
+        : scoped;
+    }
+  }
+
+  // 2. Try root command flags
+  if (cmd.flags && cmd.flags[flagKey]) {
+    const root = cmd.flags[flagKey];
+    return typeof root === 'string'
+      ? { description: root, takes_arg: isFallbackValueFlag(flagKey) }
+      : root;
+  }
+
+  return null;
+}
+
+/**
+ * Determine if a command acts as a privilege / execution wrapper
+ */
+function isWrapperCommand(cmdKey, cmd) {
+  if (cmd && cmd.is_wrapper) return true;
+  return ["sudo", "doas", "nohup", "time", "xargs", "env", "exec", "watch", "timeout", "nice", "ionice"].includes(cmdKey);
+}
+
+/**
+ * Decide if a flag should be treated as an atomic token (long flag) rather than split
+ */
+function isLongFlag(flag, tool, cmd) {
+  const body = flag.startsWith("--") ? flag.slice(2) : flag.slice(1);
+  if (flag.startsWith("--")) return true;
+  if (body.includes('=')) return true;
+  if (body.includes('-')) return true;
+  if (/^\d/.test(body)) return true;
+  if (cmd && cmd.flag_convention === "long") return true;
+  if (tool === "terraform" || tool === "openssl") return true;
+  if (cmd && cmd.flags && cmd.flags[flag]) return true;
+  return false;
+}
+
+/**
  * Parse a full terminal command string into categorized tokens
  * @param {string} input Raw terminal input string
  * @returns {Array} Array of token objects with .hazard property attached
@@ -66,7 +118,7 @@ async function initParser() {
 function parseCommand(input) {
   if (!window.COMMAND_DATA) return [];
 
-  const COMMANDS = window.COMMAND_DATA.commands;
+  const COMMANDS = window.COMMAND_DATA.commands || {};
   const PIPE_OPERATORS = window.COMMAND_DATA.pipe_operators || {};
 
   const rawInput = input.trim();
@@ -104,8 +156,9 @@ function parseCommand(input) {
 
     // 3. Command identification
     const cmdKey = token.toLowerCase();
+    const isKnownCmd = !!COMMANDS[cmdKey];
 
-    if (COMMANDS[cmdKey]) {
+    if (isKnownCmd) {
       const cmd = COMMANDS[cmdKey];
       const tool = cmd.tool || "unix";
 
@@ -117,7 +170,8 @@ function parseCommand(input) {
       });
       i++;
 
-      let lastFlag = null;
+      let activeSubcommand = null;
+      let lastExpectingFlag = null;
 
       // ── Inner loop: subcommands, flags, arguments for this command ───────
       while (i < tokens.length && !PIPE_OPERATORS[tokens[i]]) {
@@ -129,9 +183,9 @@ function parseCommand(input) {
             type: "operator",
             value: "--",
             name: "End-of-Options Separator",
-            description: "Signals the end of flags/options; subsequent tokens are treated strictly as positional arguments or an inner command"
+            description: "Signals the end of flags/options; subsequent tokens are treated strictly as positional arguments or child command"
           });
-          lastFlag = null;
+          lastExpectingFlag = null;
           i++;
 
           // If followed by words, allow subsequent recognized command
@@ -142,7 +196,7 @@ function parseCommand(input) {
         }
 
         // 3b. Wrapper command transition (e.g. sudo apt install, watch -n 2 df -h)
-        if (WRAPPER_COMMANDS.has(cmdKey) && !t.startsWith("-") && COMMANDS[t.toLowerCase()]) {
+        if (isWrapperCommand(cmdKey, cmd) && !t.startsWith("-") && COMMANDS[t.toLowerCase()]) {
           break; // break to outer loop to parse target command with its full ecosystem
         }
 
@@ -180,7 +234,8 @@ function parseCommand(input) {
           if (t.includes("=")) {
             const [flagKey, ...valParts] = t.split("=");
             const flagVal = valParts.join("=");
-            const flagDesc = (cmd.flags && cmd.flags[flagKey]) || `Option flag: ${flagKey}`;
+            const meta = resolveFlagMeta(cmd, activeSubcommand, flagKey);
+            const flagDesc = meta ? meta.description : `Option flag: ${flagKey}`;
 
             results.push({
               type: "flag",
@@ -190,7 +245,7 @@ function parseCommand(input) {
               flagKey,
               flagVal
             });
-            lastFlag = null;
+            lastExpectingFlag = null;
             i++;
             continue;
           }
@@ -204,7 +259,7 @@ function parseCommand(input) {
               value: t,
               description: `Line count: output ${count} lines (shorthand for -n ${count})`
             });
-            lastFlag = null;
+            lastExpectingFlag = null;
             i++;
             continue;
           }
@@ -215,11 +270,10 @@ function parseCommand(input) {
           if (!t.startsWith("--") && t.length > 2 && !isLong) {
             const flagParts = t.slice(1).split("").map(c => {
               const sf = "-" + c;
+              const meta = resolveFlagMeta(cmd, activeSubcommand, sf);
               return {
                 value: sf,
-                description: (cmd.flags && cmd.flags[sf])
-                  ? cmd.flags[sf]
-                  : `Flag ${sf} for ${cmdKey}`
+                description: meta ? meta.description : `Flag ${sf} for ${cmdKey}`
               };
             });
 
@@ -230,18 +284,17 @@ function parseCommand(input) {
               parts: flagParts
             });
 
-            // Check if the last flag character expects an argument (e.g. -czvf backup.tar.gz -> -f)
+            // Check if the last flag character expects an argument
             const lastChar = "-" + t.slice(-1);
-            lastFlag = FLAGS_EXPECTING_VALUE.has(lastChar) ? lastChar : null;
+            const lastMeta = resolveFlagMeta(cmd, activeSubcommand, lastChar);
+            lastExpectingFlag = (lastMeta && lastMeta.takes_arg) || isFallbackValueFlag(lastChar) ? lastChar : null;
             i++;
             continue;
           }
 
-          // Standard flag
-          let desc = (cmd.flags && cmd.flags[t]) || null;
-          if (!desc) {
-            desc = `Flag for ${cmdKey} — check official docs for details`;
-          }
+          // Standard flag: resolve with subcommand scoping
+          const flagMeta = resolveFlagMeta(cmd, activeSubcommand, t);
+          let desc = flagMeta ? flagMeta.description : `Flag for ${cmdKey} — check official docs for details`;
 
           results.push({
             type: "flag",
@@ -251,7 +304,8 @@ function parseCommand(input) {
           });
 
           // Check if this flag expects an argument value next
-          lastFlag = FLAGS_EXPECTING_VALUE.has(t) ? t : null;
+          const expectsArg = (flagMeta && flagMeta.takes_arg) || isFallbackValueFlag(t);
+          lastExpectingFlag = expectsArg ? t : null;
           i++;
           continue;
         }
@@ -265,41 +319,50 @@ function parseCommand(input) {
           ? `${t} ${t2} ${t3}`
           : null;
 
-        if (compound3 && cmd.flags && cmd.flags[compound3]) {
+        if (compound3 && ((cmd.flags && cmd.flags[compound3]) || (cmd.subcommands && cmd.subcommands[compound3]))) {
+          const subDesc = (cmd.subcommands && cmd.subcommands[compound3] && cmd.subcommands[compound3].description) ||
+                          (cmd.flags && cmd.flags[compound3]);
           results.push({
             type: "subcommand",
             tool,
             value: compound3,
-            description: cmd.flags[compound3]
+            description: subDesc
           });
-          lastFlag = null;
+          activeSubcommand = compound3;
+          lastExpectingFlag = null;
           i += 3;
           continue;
         }
 
-        // Try 2-word compound subcommand (e.g. "audit fix", "system prune", "stash pop")
+        // Try 2-word compound subcommand (e.g. "audit fix", "system prune", "stash pop", "rollout restart")
         const compound2 = (t2 && !t2.startsWith('-') && !PIPE_OPERATORS[t2]) ? `${t} ${t2}` : null;
-        if (compound2 && cmd.flags && cmd.flags[compound2]) {
+        if (compound2 && ((cmd.flags && cmd.flags[compound2]) || (cmd.subcommands && cmd.subcommands[compound2]))) {
+          const subDesc = (cmd.subcommands && cmd.subcommands[compound2] && cmd.subcommands[compound2].description) ||
+                          (cmd.flags && cmd.flags[compound2]);
           results.push({
             type: "subcommand",
             tool,
             value: compound2,
-            description: cmd.flags[compound2]
+            description: subDesc
           });
-          lastFlag = null;
+          activeSubcommand = compound2;
+          lastExpectingFlag = null;
           i += 2;
           continue;
         }
 
-        // Try single-word subcommand (e.g. "commit", "push", "plan", "install")
-        if (cmd.flags && cmd.flags[t]) {
+        // Try single-word subcommand (e.g. "commit", "push", "plan", "install", "run")
+        if ((cmd.subcommands && cmd.subcommands[t]) || (cmd.flags && cmd.flags[t])) {
+          const subDesc = (cmd.subcommands && cmd.subcommands[t] && cmd.subcommands[t].description) ||
+                          (cmd.flags && cmd.flags[t]);
           results.push({
             type: "subcommand",
             tool,
             value: t,
-            description: cmd.flags[t]
+            description: typeof subDesc === 'object' ? subDesc.description : subDesc
           });
-          lastFlag = null;
+          activeSubcommand = t;
+          lastExpectingFlag = null;
           i++;
           continue;
         }
@@ -308,7 +371,7 @@ function parseCommand(input) {
         if (cmdKey === "tar" && /^[ctxzjvfp]+$/i.test(t)) {
           const parts = t.split("").map(c => ({
             value: c,
-            description: (cmd.flags && cmd.flags["-" + c]) || `Tar option: ${c}`
+            description: (cmd.flags && cmd.flags["-" + c]) ? (cmd.flags["-" + c].description || cmd.flags["-" + c]) : `Tar option: ${c}`
           }));
           results.push({
             type: "flag",
@@ -317,20 +380,21 @@ function parseCommand(input) {
             parts,
             description: `Archive flags: ${t}`
           });
-          lastFlag = t.includes("f") ? "-f" : null;
+          lastExpectingFlag = t.includes("f") ? "-f" : null;
           i++;
           continue;
         }
 
         // Special: ps options without dash (e.g. aux)
         if (cmdKey === "ps" && cmd.flags && cmd.flags[t]) {
+          const pDesc = cmd.flags[t].description || cmd.flags[t];
           results.push({
             type: "flag",
             tool,
             value: t,
-            description: cmd.flags[t]
+            description: pDesc
           });
-          lastFlag = null;
+          lastExpectingFlag = null;
           i++;
           continue;
         }
@@ -345,14 +409,14 @@ function parseCommand(input) {
               value: t,
               description: chmodDesc
             });
-            lastFlag = null;
+            lastExpectingFlag = null;
             i++;
             continue;
           }
         }
 
         // Special: systemctl service/unit name argument
-        if (cmdKey === "systemctl" && !lastFlag && results.some(r => r.type === "subcommand")) {
+        if (cmdKey === "systemctl" && !lastExpectingFlag && results.some(r => r.type === "subcommand")) {
           results.push({
             type: "argument",
             tool,
@@ -363,16 +427,28 @@ function parseCommand(input) {
           continue;
         }
 
+        // Special: awk script pattern-action block
+        if (cmdKey === "awk" && t.startsWith("{") && t.endsWith("}")) {
+          results.push({
+            type: "argument",
+            tool,
+            value: t,
+            description: `Awk pattern-action script block: ${t}`
+          });
+          i++;
+          continue;
+        }
+
         // Context-aware Argument handling (flag value vs generic argument)
         let argDesc = guessArgument(t, cmdKey);
 
-        if (lastFlag) {
+        if (lastExpectingFlag) {
           if (argDesc.startsWith("Argument: ")) {
-            argDesc = `Value for flag ${lastFlag}: ${t}`;
+            argDesc = `Value for flag ${lastExpectingFlag}: ${t}`;
           } else {
-            argDesc = `${argDesc} (value for ${lastFlag})`;
+            argDesc = `${argDesc} (value for ${lastExpectingFlag})`;
           }
-          lastFlag = null; // consumed
+          lastExpectingFlag = null; // consumed
         }
 
         results.push({
@@ -385,21 +461,85 @@ function parseCommand(input) {
       }
 
     } else {
-      // Unknown leading command or loose token
-      if (token.startsWith("-")) {
-        results.push({
-          type: "flag",
-          value: token,
-          description: "Flag/option for the preceding command"
-        });
-      } else {
+      // ── Smart Structural Inference for Unknown / Custom CLI Tools ─────────
+      // When an unrecognized tool is typed (e.g. pulumi, ansible, custom-script),
+      // infer its command -> subcommand -> flags -> arguments structure.
+
+      results.push({
+        type: "command",
+        value: token,
+        description: `Executable command / CLI tool: ${token}`
+      });
+      i++;
+
+      let inferredSubcommand = false;
+      let lastExpectingFlag = null;
+
+      while (i < tokens.length && !PIPE_OPERATORS[tokens[i]]) {
+        const t = tokens[i];
+
+        if (t === "--") {
+          results.push({
+            type: "operator",
+            value: "--",
+            name: "End-of-Options Separator",
+            description: "Signals the end of flags/options"
+          });
+          lastExpectingFlag = null;
+          i++;
+          continue;
+        }
+
+        if (t.startsWith("-")) {
+          if (t.includes("=")) {
+            const [fKey, ...vParts] = t.split("=");
+            const fVal = vParts.join("=");
+            results.push({
+              type: "flag",
+              value: t,
+              description: `Option flag: ${fKey} (assigned value: ${fVal})`
+            });
+            lastExpectingFlag = null;
+            i++;
+            continue;
+          }
+
+          results.push({
+            type: "flag",
+            value: t,
+            description: `Option flag for command: ${t}`
+          });
+          lastExpectingFlag = isFallbackValueFlag(t) ? t : null;
+          i++;
+          continue;
+        }
+
+        // First non-flag token after command is likely a subcommand (action)
+        if (!inferredSubcommand && !lastExpectingFlag && !t.includes("/") && !t.includes(".")) {
+          results.push({
+            type: "subcommand",
+            value: t,
+            description: `Subcommand / action: ${t}`
+          });
+          inferredSubcommand = true;
+          i++;
+          continue;
+        }
+
+        // Argument / value
+        let argDesc = guessArgument(t);
+        if (lastExpectingFlag) {
+          argDesc = `Value for flag ${lastExpectingFlag}: ${t}`;
+          lastExpectingFlag = null;
+        }
+
         results.push({
           type: "argument",
-          value: token,
-          description: guessArgument(token)
+          value: t,
+          description: argDesc
         });
+        i++;
       }
-      i++;
     }
   }
 
@@ -409,7 +549,7 @@ function parseCommand(input) {
 }
 
 /**
- * Tokenize input string preserving quoted strings, escapes, and multi-char operators
+ * Tokenize input string preserving quoted strings, escapes, subshells $(...), and multi-char operators
  */
 function tokenize(input) {
   const tokens = [];
@@ -442,6 +582,42 @@ function tokenize(input) {
 
     if (ch === '"' || ch === "'") {
       inQuote = ch;
+      continue;
+    }
+
+    // Command substitution $( ... )
+    if (ch === '$' && input[i + 1] === '(') {
+      if (current) { tokens.push(current); current = ""; }
+      let sub = "$(";
+      let depth = 1;
+      i += 2;
+      while (i < input.length && depth > 0) {
+        if (input[i] === '(') depth++;
+        else if (input[i] === ')') depth--;
+        if (depth > 0) sub += input[i];
+        i++;
+      }
+      sub += ")";
+      i--; // adjust loop increment
+      tokens.push(sub);
+      continue;
+    }
+
+    // Process substitution <( ... ) or >( ... )
+    if ((ch === '<' || ch === '>') && input[i + 1] === '(') {
+      if (current) { tokens.push(current); current = ""; }
+      let sub = ch + "(";
+      let depth = 1;
+      i += 2;
+      while (i < input.length && depth > 0) {
+        if (input[i] === '(') depth++;
+        else if (input[i] === ')') depth--;
+        if (depth > 0) sub += input[i];
+        i++;
+      }
+      sub += ")";
+      i--;
+      tokens.push(sub);
       continue;
     }
 
@@ -490,20 +666,6 @@ function tokenize(input) {
 
   if (current) tokens.push(current);
   return tokens;
-}
-
-/**
- * Decide if a flag should be treated as a single token (long flag) rather than split
- */
-function isLongFlag(flag, tool, cmd) {
-  const body = flag.startsWith("--") ? flag.slice(2) : flag.slice(1);
-  if (flag.startsWith("--")) return true;
-  if (body.includes('=')) return true;
-  if (body.includes('-')) return true;
-  if (/^\d/.test(body)) return true;
-  if (STRICT_LONG_TOOLS.has(tool)) return true;
-  if (cmd && cmd.flags && cmd.flags[flag]) return true;
-  return false;
 }
 
 /**
@@ -583,12 +745,23 @@ function guessArgument(token, cmdContext = null) {
     if (chmodDesc) return chmodDesc;
   }
 
-  // 3. Command substitution
-  if (/^\$\(.*\)$/.test(t) || /^`.*`$/.test(t)) {
-    return `Command substitution (executes command and substitutes stdout): ${t}`;
+  // 3. Command substitution: $(...) or `...`
+  if (t.startsWith('$(') && t.endsWith(')')) {
+    const inner = t.slice(2, -1).trim();
+    return `Command substitution: $(...) — executes '${inner}' and substitutes stdout`;
+  }
+  if (t.startsWith('`') && t.endsWith('`')) {
+    const inner = t.slice(1, -1).trim();
+    return `Command substitution: \`...\` — executes '${inner}' and substitutes stdout`;
   }
 
-  // 4. Shell variables
+  // 4. Process substitution: <(...) or >(...)
+  if ((t.startsWith('<(') || t.startsWith('>(')) && t.endsWith(')')) {
+    const inner = t.slice(2, -1).trim();
+    return `Process substitution: ${t.slice(0, 2)}...) — passes output of '${inner}' as a file descriptor`;
+  }
+
+  // 5. Shell variables
   if (/^\$[A-Za-z_][A-Za-z0-9_]*$/.test(t) || /^\$\{[A-Za-z_][A-Za-z0-9_]*\}$/.test(t)) {
     return `Shell variable reference: ${t}`;
   }
@@ -605,18 +778,18 @@ function guessArgument(token, cmdContext = null) {
     return `Special shell parameter: ${specialVars[t] || t}`;
   }
 
-  // 5. Environment variable assignment
+  // 6. Environment variable assignment
   if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(t)) {
     return `Environment variable assignment: ${t}`;
   }
 
-  // 6. Paths
+  // 7. Paths
   if (/^\//.test(t))  return `Absolute path: ${t}`;
   if (/^~/.test(t))   return `Home directory path: ${t}`;
   if (/^\.\.?\//.test(t)) return `Relative path: ${t}`;
   if (t === "." || t === "..") return `Relative path (${t === "." ? "current directory" : "parent directory"})`;
 
-  // 7. Network / URLs
+  // 8. Network / URLs
   if (/^https?:\/\//i.test(t)) return `Web URL: ${t}`;
   if (/^s3:\/\//i.test(t))     return `S3 bucket/object path: ${t}`;
   if (/^gs:\/\//i.test(t))     return `GCS bucket/object path: ${t}`;
@@ -626,35 +799,35 @@ function guessArgument(token, cmdContext = null) {
   if (/^git@[a-zA-Z0-9.-]+:/.test(t)) return `Git SSH repository URL: ${t}`;
   if (/@/.test(t)) return `User@host address: ${t}`;
 
-  // 8. Cryptographic key specifications
+  // 9. Cryptographic key specifications
   if (/^(rsa|ec|ed25519|dsa):\d+$/i.test(t)) return `Cryptographic key specification: ${t}`;
 
-  // 9. Git references
+  // 10. Git references
   if (/^HEAD(~[0-9]+|\^[0-9]*)?$/.test(t)) return `Git HEAD commit reference (${t})`;
   if (/^(origin|upstream)\/[a-zA-Z0-9._/-]+$/.test(t)) return `Remote tracking branch: ${t}`;
   if (/^[0-9a-f]{7,40}$/i.test(t)) return `Git commit SHA hash: ${t}`;
   if (t === "origin" || t === "upstream") return `Git remote repository name: ${t}`;
   if (["main", "master", "develop", "staging", "prod", "production"].includes(t)) return `Git branch name: ${t}`;
 
-  // 10. Kubernetes resources
+  // 11. Kubernetes resources
   const k8sMatch = t.match(/^(pods?|po|services?|svc|deployments?|deploy|namespaces?|ns|configmaps?|cm|secrets?|ingresses?|ing|statefulsets?|sts|daemonsets?|ds|jobs?|cronjobs?|nodes?|no|pvc|pv|events?)(\/[a-z0-9._-]+)?$/i);
   if (k8sMatch) {
     return `Kubernetes resource: ${t}`;
   }
 
-  // 11. Container image references
+  // 12. Container image references
   if (/^[a-z0-9._/-]+:[a-z0-9._-]+$/.test(t) && !t.startsWith('-')) {
     return `Container image reference: ${t}`;
   }
 
-  // 12. Versions & Numbers
+  // 13. Versions & Numbers
   if (/^v?\d+\.\d+(\.\d+)?(-[a-z0-9.]+)?$/i.test(t)) return `Version string: ${t}`;
   if (/^\d+$/.test(t)) {
     if (cmdContext === "kill") return `Target Process ID (PID): ${t}`;
     return `Numeric value: ${t}`;
   }
 
-  // 13. File types
+  // 14. File types
   if (/\.ya?ml$/i.test(t)) return `YAML configuration file: ${t}`;
   if (/\.json$/i.test(t)) return `JSON file: ${t}`;
   if (/\.tfvars$/i.test(t)) return `Terraform variables file: ${t}`;
@@ -671,7 +844,7 @@ function guessArgument(token, cmdContext = null) {
   if (/\.(md|markdown)$/i.test(t)) return `Markdown document: ${t}`;
   if (/\./.test(t)) return `File or path: ${t}`;
 
-  // 14. Glob / wildcards
+  // 15. Glob / wildcards
   if (/[*?]/.test(t) || (/\{.*,.*\}/.test(t))) return `Glob / wildcard pattern: ${t}`;
 
   return `Argument: ${t}`;
@@ -767,6 +940,7 @@ if (typeof module !== 'undefined' && module.exports) {
     guessArgument,
     scanHazards,
     decodeChmod,
-    decodeKillSignal
+    decodeKillSignal,
+    resolveFlagMeta
   };
 }

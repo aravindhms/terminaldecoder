@@ -124,6 +124,40 @@ it('should expand combined POSIX short flags', () => {
   assert(flag.parts && flag.parts.length === 4);
 });
 
+it('should scope flags per subcommand (git commit -m vs git branch -m)', () => {
+  const rCommit = parseCommand('git commit -m "my commit"');
+  const commitM = rCommit.find(r => r.value === '-m');
+  assert(commitM);
+  assert(commitM.description.includes('Commit message'));
+
+  const rBranch = parseCommand('git branch -m new-feature');
+  const branchM = rBranch.find(r => r.value === '-m');
+  assert(branchM);
+  assert(branchM.description.toLowerCase().includes('move') || branchM.description.toLowerCase().includes('rename'));
+});
+
+it('should tokenize command substitutions $(...) without splitting internal pipelines', () => {
+  const results = parseCommand('echo $(cat /var/log/syslog | grep error)');
+  assert.strictEqual(results[0].value, 'echo');
+  assert.strictEqual(results[1].type, 'argument');
+  assert.strictEqual(results[1].value, '$(cat /var/log/syslog | grep error)');
+  assert(results[1].description.includes('Command substitution'));
+});
+
+it('should infer structure for unknown CLI tools', () => {
+  const results = parseCommand('pulumi up --stack dev -y');
+  assert.strictEqual(results[0].type, 'command');
+  assert.strictEqual(results[0].value, 'pulumi');
+  assert.strictEqual(results[1].type, 'subcommand');
+  assert.strictEqual(results[1].value, 'up');
+  assert.strictEqual(results[2].type, 'flag');
+  assert.strictEqual(results[2].value, '--stack');
+  assert.strictEqual(results[3].type, 'argument');
+  assert(results[3].description.includes('Value for flag --stack'));
+  assert.strictEqual(results[4].type, 'flag');
+  assert.strictEqual(results[4].value, '-y');
+});
+
 // 4. Hazard Scanner
 console.log('\n4. Hazard / Safety Scanner:');
 it('should flag rm -rf / as dangerous', () => {

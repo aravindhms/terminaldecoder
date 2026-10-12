@@ -1,0 +1,21 @@
+{
+  "name": "Terminal Decoder",
+  "short_name": "TerminalDecoder",
+  "description": "Instantly decode any terminal command token by token.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0f14",
+  "theme_color": "#0d0f14",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -708,4 +708,13 @@ function getWelcomeHTML() {
 }
 
 // Initialize on DOM load
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+
+  // Register Service Worker for offline PWA support
+  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('./sw.js').catch(err => {
+      console.warn('ServiceWorker registration skipped:', err);
+    });
+  }
+});
