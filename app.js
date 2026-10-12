@@ -155,8 +155,50 @@ const TOOL_EXAMPLES = {
 let activeTool = "all";
 const DOM = {};
 
+// ── Theme management ────────────────────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('td_theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (prefersDark ? 'dark' : 'light');
+  setTheme(theme);
+
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem('td_theme')) {
+        setTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+  }
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) {
+    metaTheme.setAttribute('content', theme === 'light' ? '#f8fafc' : '#0d0f14');
+  }
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (toggleBtn) {
+    const icon = toggleBtn.querySelector('.theme-icon');
+    if (icon) {
+      icon.textContent = theme === 'light' ? '☀️' : '🌙';
+    }
+    toggleBtn.setAttribute('title', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+    toggleBtn.setAttribute('aria-label', theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'light' ? 'dark' : 'light';
+  localStorage.setItem('td_theme', next);
+  setTheme(next);
+}
+
 // Initialize the application
 async function init() {
+  initTheme();
+
   DOM.input          = document.getElementById('command-input');
   DOM.results        = document.getElementById('results');
   DOM.btnExplain     = document.getElementById('btn-explain');
@@ -166,6 +208,7 @@ async function init() {
   DOM.recentsSection = document.getElementById('recents-section');
   DOM.recentChips    = document.getElementById('recent-chips');
   DOM.logoReset      = document.getElementById('logo-reset');
+  DOM.themeToggle    = document.getElementById('theme-toggle');
 
   const loaded = await initParser();
   if (!loaded) {
@@ -270,6 +313,9 @@ function renderRecentChips() {
 }
 
 function attachEventListeners() {
+  if (DOM.themeToggle) {
+    DOM.themeToggle.addEventListener('click', toggleTheme);
+  }
   DOM.btnExplain.addEventListener('click', explain);
   DOM.btnClear.addEventListener('click', resetApp);
   DOM.logoReset.addEventListener('click', resetApp);
