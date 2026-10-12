@@ -684,9 +684,9 @@ function decodeChmod(mode) {
       "Read & write (rw-)",
       "Read, write & execute (rwx)"
     ];
-    const u = parseInt(octal[0], 8);
-    const g = parseInt(octal[1], 8);
-    const o = parseInt(octal[2], 8);
+    const u = Number.parseInt(octal[0], 8);
+    const g = Number.parseInt(octal[1], 8);
+    const o = Number.parseInt(octal[2], 8);
     return `Owner: ${labels[u] || u}, Group: ${labels[g] || g}, Others: ${labels[o] || o}`;
   }
   if (/^[ugoa]*[+-=][rwxXst]+(,[ugoa]*[+-=][rwxXst]+)*$/.test(mode)) {

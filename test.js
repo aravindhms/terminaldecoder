@@ -6,6 +6,7 @@
 const fs = require('fs');
 const assert = require('assert');
 const path = require('path');
+const vm = require('vm');
 
 // Mock browser environment for parser module
 const commandsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'commands.json'), 'utf8'));
@@ -184,8 +185,8 @@ it('should parse all built-in examples with zero fallback flags', () => {
   const appCode = fs.readFileSync(path.join(__dirname, 'app.js'), 'utf8');
   const match = appCode.match(/const TOOL_EXAMPLES = (\{[\s\S]*?\n\};)/);
   assert(match, 'Could not find TOOL_EXAMPLES in app.js');
-  let TOOL_EXAMPLES;
-  eval('TOOL_EXAMPLES = ' + match[1]);
+  const codeToRun = '(' + match[1].replace(/;$/, '') + ')';
+  const TOOL_EXAMPLES = vm.runInNewContext(codeToRun);
 
   let missingFlags = 0;
   for (const [cat, list] of Object.entries(TOOL_EXAMPLES)) {

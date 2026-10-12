@@ -619,7 +619,9 @@ function renderResults(raw, parsed) {
   if (shareBtn) {
     shareBtn.addEventListener('click', () => {
       const shareUrl = `${window.location.origin}${window.location.pathname}?cmd=${encodeURIComponent(raw)}`;
-      copyToClipboard(shareUrl, shareBtn, 'Link Copied!');
+      copyToClipboard(shareUrl, shareBtn, 'Link Copied!').catch(err => {
+        console.error('Failed to copy link:', err);
+      });
     });
   }
 
@@ -627,7 +629,9 @@ function renderResults(raw, parsed) {
   if (markdownBtn) {
     markdownBtn.addEventListener('click', () => {
       const md = generateMarkdown(raw, parsed);
-      copyToClipboard(md, markdownBtn, 'Markdown Copied!');
+      copyToClipboard(md, markdownBtn, 'Markdown Copied!').catch(err => {
+        console.error('Failed to copy markdown:', err);
+      });
     });
   }
 
@@ -635,7 +639,9 @@ function renderResults(raw, parsed) {
   if (copySummaryBtn) {
     copySummaryBtn.addEventListener('click', () => {
       const summary = generateSummary(raw, parsed);
-      copyToClipboard(summary, copySummaryBtn, 'Text Copied!');
+      copyToClipboard(summary, copySummaryBtn, 'Text Copied!').catch(err => {
+        console.error('Failed to copy summary:', err);
+      });
     });
   }
 
@@ -755,7 +761,9 @@ function getWelcomeHTML() {
 
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
-  init();
+  init().catch(err => {
+    console.error('Failed to initialize app:', err);
+  });
 
   // Register Service Worker for offline PWA support
   if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
