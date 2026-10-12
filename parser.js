@@ -845,7 +845,9 @@ function guessArgument(token, cmdContext = null) {
   if (/\./.test(t)) return `File or path: ${t}`;
 
   // 15. Glob / wildcards
-  if (/[*?]/.test(t) || (/\{[^{}]*,[^{}]*\}/.test(t))) return `Glob / wildcard pattern: ${t}`;
+  if (t.includes('*') || t.includes('?') || (t.includes('{') && t.includes(',') && t.includes('}'))) {
+    return `Glob / wildcard pattern: ${t}`;
+  }
 
   return `Argument: ${t}`;
 }
