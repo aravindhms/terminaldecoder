@@ -17,6 +17,7 @@
   --red: #fc8181;
   --orange: #f6ad55;
   --pink: #f687b3;
+  --purple: #b794f4;
 
   --cmd-bg: rgba(99,179,237,0.1);
   --cmd-border: rgba(99,179,237,0.4);
@@ -37,6 +38,11 @@
   --sub-bg: rgba(246,135,179,0.1);
   --sub-border: rgba(246,135,179,0.4);
   --sub-text: #feb2d9;
+
+  --env-bg: rgba(183,148,244,0.12);
+  --env-border: rgba(183,148,244,0.4);
+  --env-text: #d6bcfa;
+
 
   --radius: 16px;
   --radius-sm: 10px;
@@ -420,8 +426,10 @@ header {
   display: flex;
   gap: 8px;
   z-index: 2;
+  flex-wrap: wrap;
 }
 
+.btn-action,
 .btn-copy {
   background: var(--bg3);
   border: 1px solid var(--border);
@@ -437,18 +445,143 @@ header {
   transition: all 0.2s;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  font-family: inherit;
 }
 
+.btn-action:hover,
 .btn-copy:hover {
   background: var(--bg);
   border-color: var(--accent);
   color: var(--accent);
 }
 
+.btn-action.copied,
 .btn-copy.copied {
   color: var(--green);
   border-color: var(--green);
-  background: rgba(104,211,145,0.05);
+  background: rgba(104,211,145,0.08);
+}
+
+/* ── Hazard / Safety Warning Banner ── */
+.hazard-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 24px;
+  animation: fadeIn 0.3s ease both;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hazard-banner.danger {
+  background: rgba(252, 129, 129, 0.12);
+  border: 1px solid rgba(252, 129, 129, 0.45);
+  box-shadow: 0 4px 24px rgba(252, 129, 129, 0.12);
+}
+
+.hazard-banner.warning {
+  background: rgba(246, 173, 85, 0.12);
+  border: 1px solid rgba(246, 173, 85, 0.45);
+  box-shadow: 0 4px 24px rgba(246, 173, 85, 0.12);
+}
+
+.hazard-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.hazard-content {
+  flex: 1;
+}
+
+.hazard-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hazard-banner.danger .hazard-title { color: #feb2b2; }
+.hazard-banner.warning .hazard-title { color: #fbd38d; }
+
+.hazard-desc {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* ── Recent Commands ── */
+.recents-hint {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  animation: fadeIn 0.25s ease both;
+}
+
+.recents-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.recent-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+}
+
+.recent-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 3px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.recent-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--cmd-bg);
+}
+
+/* ── Keyboard Shortcut Hints ── */
+.input-hint {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.input-hint span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kbd {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-muted);
 }
 
 .token {
@@ -471,6 +604,7 @@ header {
 .token.argument{ background: var(--arg-bg); border-color: var(--arg-border); color: var(--arg-text); }
 .token.operator{ background: var(--op-bg); border-color: var(--op-border); color: var(--op-text); }
 .token.subcommand { background: var(--sub-bg); border-color: var(--sub-border); color: var(--sub-text); }
+.token.env_var { background: var(--env-bg); border-color: var(--env-border); color: var(--env-text); }
 
 /* ── Explanation Cards ── */
 .cards-grid {
@@ -512,17 +646,19 @@ header {
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 4px;
+  background: var(--glow-color, var(--accent));
   border-radius: 4px 0 0 4px;
   transition: opacity 0.2s;
 }
 
-.card.command { --glow-color: var(--accent); }
-.card.flag    { --glow-color: var(--green); }
-.card.argument{ --glow-color: var(--orange); }
-.card.operator{ --glow-color: var(--yellow); }
+.card.command    { --glow-color: var(--accent); }
+.card.flag       { --glow-color: var(--green); }
+.card.argument   { --glow-color: var(--orange); }
+.card.operator   { --glow-color: var(--yellow); }
 .card.subcommand { --glow-color: var(--pink); }
+.card.env_var    { --glow-color: var(--purple); }
 
-.card:hover, .card.highlighted {
+.card:hover, .card.active, .card.highlighted {
   border-color: var(--glow-color);
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(0,0,0,0.3);
@@ -559,6 +695,7 @@ header {
 .card.argument .card-badge  { background: var(--arg-bg); color: var(--arg-text); }
 .card.operator .card-badge  { background: var(--op-bg); color: var(--op-text); }
 .card.subcommand .card-badge{ background: var(--sub-bg); color: var(--sub-text); }
+.card.env_var .card-badge   { background: var(--env-bg); color: var(--env-text); }
 
 /* ── Per-tool badge ── */
 .tool-badge {

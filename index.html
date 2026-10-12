@@ -96,10 +96,23 @@
         </div>
       </div>
 
+      <!-- Keyboard shortcuts hint -->
+      <div class="input-hint" aria-hidden="true">
+        <span><kbd class="kbd">/</kbd> focus</span>
+        <span><kbd class="kbd">↵</kbd> decode</span>
+        <span><kbd class="kbd">Esc</kbd> reset</span>
+      </div>
+
       <!-- Example chips -->
       <div class="examples-hint" aria-label="Example commands">
         <span class="hint-label">Try:</span>
         <div class="example-chips-wrap" id="example-chips"></div>
+      </div>
+
+      <!-- Recent commands -->
+      <div class="recents-hint" id="recents-section" style="display: none;" aria-label="Recent commands">
+        <span class="recents-label">Recent:</span>
+        <div class="recent-chips-wrap" id="recent-chips"></div>
       </div>
     </section>
 

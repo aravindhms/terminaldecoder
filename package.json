@@ -1,17 +1,31 @@
 {
   "name": "terminaldecoder",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Instantly decode any terminal command — token by token.",
   "main": "app.js",
   "scripts": {
     "dev": "npx serve .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aravindhms/terminaldecoder.git"
   },
-  "keywords": [],
+  "keywords": [
+    "terminal",
+    "cli",
+    "command-line",
+    "shell",
+    "bash",
+    "zsh",
+    "git",
+    "docker",
+    "kubernetes",
+    "terraform",
+    "aws",
+    "azure",
+    "gcloud"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {

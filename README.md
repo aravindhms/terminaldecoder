@@ -20,7 +20,7 @@ Paste a command, get a colour-coded breakdown of every flag, subcommand, argumen
 
 Terminal Decoder is a lightweight, **fully client-side web app** that turns opaque shell one-liners into plain-English explanations. Hover over any token in the command bar to highlight its matching card. Click an example chip to try a real command in seconds.
 
-It covers **12 CLI ecosystems** out of the box — from Unix core-utils to cloud CLIs — powered by a single flat JSON database with zero runtime dependencies.
+It covers **80+ CLI tools and ecosystems** out of the box — from Unix core-utils to cloud CLIs, package managers, and runtimes — powered by a single flat JSON database with zero runtime dependencies.
 
 ---
 
@@ -28,14 +28,20 @@ It covers **12 CLI ecosystems** out of the box — from Unix core-utils to cloud
 
 | Feature | Description |
 |---|---|
-| 🎨 **Colour-coded token bar** | Each token (command, flag, argument, operator, subcommand) gets a distinct colour and a paired explanation card |
+| 🎨 **Colour-coded token bar** | Each token (command, flag, argument, operator, subcommand, env var) gets a distinct colour and a paired explanation card |
+| 🚨 **Hazard & Safety Scanner** | Detects destructive commands (`rm -rf /`, fork bombs, raw disk writes, `git reset --hard`, `terraform destroy`) and warns before execution |
+| 🔗 **Shareable URLs** | Direct URL links (`?cmd=...`) let you bookmark or send decoded breakdowns directly to teammates |
+| 📋 **Copy Markdown & Summary** | One-click export to formatted GitHub Markdown tables, Slack-ready bullet points, or plain text |
+| 👑 **Privilege & Wrapper Aware** | Seamlessly understands wrapper commands like `sudo`, `doas`, `nohup`, `time`, `watch`, and `xargs` |
+| ⚙️ **Leading Environment Variables** | Detects and styles prepended environment variables (e.g. `NODE_ENV=production npm run build`) |
+| 🧮 **Dynamic Permission Decoder** | Mathematically decodes octal (`755`, `644`) and symbolic (`+x`, `u+rwx`) `chmod` modes into plain English |
+| ⚡ **Kill Signal Decoder** | Translates numeric signals (`-9`, `-15`, `-1`) and named signals (`-KILL`, `-TERM`, `-HUP`) into signal descriptions |
 | 🔗 **Hover sync** | Hovering a token highlights its card and vice-versa |
-| 🧩 **Combined flag expansion** | `-la` expands into individual `-l` and `-a` rows inside one card |
-| 🤖 **Smart argument guesser** | Regex heuristics auto-label paths, URLs, port maps (`8080:80`), image refs (`nginx:latest`), env vars (`KEY=VALUE`), certs (`.pem`), archives, and more |
-| 📋 **Copy Summary** | One-click formatted text breakdown of any command — great for docs, PR descriptions, or Slack |
-| 🏷️ **Tool filter pills** | Filter the example chips by ecosystem (Unix, Git, Docker, …) |
-| ↗️ **Official docs links** | Every command card links to its man page or official documentation |
-| ⚡ **Zero install** | Pure HTML + CSS + JavaScript — open `index.html` via a local server and you're done |
+| 🧩 **Combined flag expansion** | `-la` and `-czvf` expand into individual flag rows inside one card |
+| 🤖 **Smart argument guesser** | Accurately identifies JSON payloads, Git refs, Kubernetes resources, ports, CIDRs, URLs, paths, and env vars |
+| 🏷️ **Tool filter pills & recents** | Quick-filter examples by ecosystem and recall past commands via recent command chips |
+| ↗️ **Deep docs links** | Command cards deep-link directly to relevant subcommands in official docs and man pages |
+| ⚡ **Zero dependencies** | Pure HTML + CSS + JavaScript with automated test suite (`npm test`) |
 
 ---
 
@@ -43,18 +49,21 @@ It covers **12 CLI ecosystems** out of the box — from Unix core-utils to cloud
 
 | Tool | Highlights |
 |---|---|
-| 🐧 **Unix** | `ls`, `grep`, `find`, `curl`, `ssh`, `rsync`, `scp`, `awk`, `sed`, `ps`, `kill`, `tar`, `chmod`, `chown`, `ss`, `dig`, `ip`, `lsof`, `watch`, `journalctl`, `htop`, `free`, `df`, `du`, `vim`, `nano`, `date`, `uname`, `crontab`, `zip`, `unzip` + more |
-| ⑂ **Git** | `commit`, `push`, `pull`, `rebase`, `cherry-pick`, `stash`, `config`, `reflog`, `worktree`, `submodule`, `blame`, `--force-with-lease`, `--no-verify`, `--autosquash` + more |
-| ◈ **Terraform** | `init`, `plan`, `apply`, `destroy`, `validate`, `fmt`, `output`, `import`, `state`, `workspace`, `-var`, `-var-file`, `-target`, `-auto-approve` + more |
-| 🐳 **Docker** | `run`, `build`, `push`, `pull`, `exec`, `logs`, `inspect`, `network`, `volume`, `compose` + all major flags |
-| ☸ **Kubernetes** | `get`, `apply`, `delete`, `describe`, `exec`, `logs`, `rollout`, `drain`, `cordon`, `wait`, `api-resources`, `explain` + more |
-| ☁️ **AWS CLI** | `s3`, `ec2`, `iam`, `ecs`, `eks`, `ecr`, `lambda`, `cloudformation`, `rds`, `sts`, `ssm`, `logs`, `secretsmanager` + global flags |
-| △ **Azure CLI** | `vm`, `aks`, `acr`, `storage`, `keyvault`, `webapp`, `functionapp`, `ad`, `role`, `monitor`, `devops`, `cosmosdb` + global flags |
-| ◎ **gcloud** | `compute`, `container`, `run`, `functions`, `storage`, `iam`, `logging`, `builds`, `artifacts`, `pubsub`, `secrets` + global flags |
-| ⬡ **npm** | `install`, `run`, `publish`, `audit`, `ci`, `link`, `pack`, `exec` + flags |
+| 🐧 **Unix & Sudo** | `sudo`, `doas`, `ls`, `grep`, `find`, `curl`, `ssh`, `rsync`, `scp`, `awk`, `sed`, `ps`, `kill`, `tar`, `chmod`, `chown`, `ss`, `dig`, `ip`, `lsof`, `watch`, `journalctl`, `htop`, `free`, `df`, `du`, `vim`, `nano`, `date`, `uname`, `crontab`, `zip`, `unzip`, `ffmpeg`, `ssh-keygen` |
+| ⑂ **Git & GitHub** | `commit`, `push`, `pull`, `rebase`, `cherry-pick`, `stash`, `switch`, `restore`, `config`, `reflog`, `worktree`, `submodule`, `blame`, `gh` (PRs, issues, repos, releases) |
+| 🐳 **Docker** | `run`, `build`, `push`, `pull`, `exec`, `logs`, `inspect`, `network`, `volume`, `compose`, `system prune`, `-af`, `--volumes` |
+| ☸ **Kubernetes & Helm** | `get`, `apply`, `delete`, `describe`, `exec`, `logs`, `rollout restart`, `scale`, `port-forward`, `drain`, `cordon`, `helm` (install, upgrade, repo, template) |
+| ◈ **Terraform** | `init`, `plan`, `apply`, `destroy`, `validate`, `fmt`, `output`, `import`, `state`, `workspace`, `-var`, `-var-file`, `-target`, `-auto-approve`, `-recursive` |
+| ☁️ **AWS CLI** | `s3`, `ec2`, `iam`, `ecs`, `eks`, `ecr`, `lambda`, `cloudformation`, `rds`, `sts`, `ssm`, `logs`, `secretsmanager`, `describe-instances`, `update-kubeconfig`, `tail` |
+| △ **Azure CLI** | `vm`, `aks`, `acr`, `storage`, `keyvault`, `webapp`, `functionapp`, `ad`, `role`, `monitor`, `devops`, `cosmosdb`, `blob upload`, `secret show` |
+| ◎ **gcloud** | `compute`, `container`, `run`, `functions`, `storage`, `iam`, `logging`, `builds`, `artifacts`, `pubsub`, `secrets`, `run deploy`, `logging read` |
+| ⬡ **JS / TS Ecosystem** | `npm`, `pnpm`, `yarn`, `bun`, `node` |
+| 🐍 **Python Ecosystem** | `python`, `python3`, `pip`, `pip3`, `venv`, `pytest` |
+| 🦀 **Rust & Go** | `cargo` (build, run, test, clippy), `go` (run, build, test, mod tidy) |
+| 📦 **Package Managers** | `apt`, `apt-get`, `brew` (Homebrew formulae and casks) |
 | ⚙️ **systemctl** | `start`, `stop`, `restart`, `status`, `enable`, `disable`, `reload`, `mask`, `daemon-reload`, `list-units` |
 | {} **jq** | `.field`, `[]`, `\|`, `select`, `map`, `keys`, `length`, `has`, `@base64`, `--arg`, `--slurp`, `--raw-output` |
-| 🔐 **openssl** | `genrsa`, `req`, `x509`, `s_client`, `dgst`, `verify`, `enc`, `pkcs12` |
+| 🔐 **openssl** | `genrsa`, `req`, `x509`, `s_client`, `dgst`, `verify`, `enc`, `pkcs12`, `-sign`, `-sha256` |
 
 ---
 
@@ -213,8 +222,9 @@ That's it — no build step required.
 
 1. Fork the repo and create a branch: `git checkout -b feat/add-mytool`
 2. Make your changes following the patterns above
-3. Test locally with `npx serve .`
-4. Open a pull request with a short description of what you added or fixed
+3. Run test suite: `npm test`
+4. Test locally with `npx serve .`
+5. Open a pull request with a short description of what you added or fixed
 
 Bug reports and feature requests are welcome via [GitHub Issues](https://github.com/aravindhms/terminaldecoder/issues).
 

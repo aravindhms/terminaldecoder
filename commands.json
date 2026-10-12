@@ -3,7 +3,9 @@
     "ls": {
       "tool": "unix",
       "description": "List directory contents",
-      "args": { "description": "Path(s) to list. Defaults to current directory." },
+      "args": {
+        "description": "Path(s) to list. Defaults to current directory."
+      },
       "flags": {
         "-l": "Long listing format: shows permissions, owner, size, date",
         "-a": "Show all files including hidden (starting with .)",
@@ -21,7 +23,9 @@
     "grep": {
       "tool": "unix",
       "description": "Search text using patterns (Global Regular Expression Print)",
-      "args": { "description": "PATTERN followed by FILE(s) to search in" },
+      "args": {
+        "description": "PATTERN followed by FILE(s) to search in"
+      },
       "flags": {
         "-i": "Case-insensitive matching",
         "-r": "Recursively search subdirectories",
@@ -32,41 +36,52 @@
         "-l": "Print only filenames of files with matches",
         "-w": "Match whole words only",
         "-o": "Print only the matched part of the line",
-        "-E": "Extended regex (supports +, ?, |, ())",
+        "-E": "Interpret pattern as an Extended Regular Expression (ERE)",
         "-P": "Perl-compatible regex (PCRE)",
         "-A": "Show N lines After each match",
         "-B": "Show N lines Before each match",
         "-C": "Show N lines of Context around each match",
         "--color": "Highlight matches in color",
         "-q": "Quiet mode — no output, just exit code",
-        "-m": "Stop after N matches"
+        "-m": "Stop after N matches",
+        "-e": "Specify pattern to search for (useful if pattern begins with a dash)",
+        "-F": "Interpret pattern as Fixed Strings (avoids regex overhead, faster)"
       }
     },
     "find": {
       "tool": "unix",
       "description": "Search for files in a directory hierarchy",
-      "args": { "description": "Starting directory for the search" },
+      "args": {
+        "description": "Starting directory for the search"
+      },
       "flags": {
         "-name": "Search by filename (case-sensitive, supports wildcards)",
         "-iname": "Search by filename (case-insensitive)",
-        "-type": "Filter by type: f=file, d=directory, l=symlink",
+        "-type": "Filter by file type: f=file, d=directory, l=symlink, s=socket, p=pipe",
         "-size": "Filter by size (e.g., +10M, -1k)",
         "-mtime": "Modified N days ago (+N older than, -N within N days)",
-        "-exec": "Execute a command on each found file",
+        "-exec": "Execute command on each matching file (terminated by ';' or '+')",
         "-maxdepth": "Limit search depth to N levels",
         "-mindepth": "Skip the first N levels",
         "-user": "Files owned by a specific user",
         "-perm": "Files with specific permissions",
         "-empty": "Find empty files or directories",
         "-delete": "Delete found files (use with caution!)",
-        "-print": "Print the full path of found files (default)"
+        "-print": "Print the full path of found files (default)",
+        "+": "Terminator for -exec that runs command with all matching files at once",
+        ";": "Terminator for -exec that runs command once per matching file"
       }
     },
     "chmod": {
       "tool": "unix",
       "description": "Change file mode (permissions)",
-      "args": { "description": "MODE followed by FILE(s) to change" },
+      "args": {
+        "description": "MODE followed by FILE(s) to change"
+      },
       "flags": {
+        "644": "Owner: rw-, Group: r--, Others: r--",
+        "755": "Owner: rwx, Group: r-x, Others: r-x",
+        "777": "Full permissions for everyone (use with caution!)",
         "-R": "Apply recursively to directories and their contents",
         "-v": "Verbose: output each file processed",
         "-c": "Report only when a change is made",
@@ -74,16 +89,15 @@
         "g+w": "Add write permission for the group",
         "o-r": "Remove read permission for others",
         "a+r": "Add read permission for all (user, group, others)",
-        "755": "Owner: rwx, Group: r-x, Others: r-x",
-        "644": "Owner: rw-, Group: r--, Others: r--",
-        "777": "Full permissions for everyone (use with caution!)",
         "000": "No permissions for anyone"
       }
     },
     "tar": {
       "tool": "unix",
       "description": "Archive utility — tape archiver",
-      "args": { "description": "Archive file followed by source file(s)/directory" },
+      "args": {
+        "description": "Archive file followed by source file(s)/directory"
+      },
       "flags": {
         "-c": "Create a new archive",
         "-x": "Extract files from an archive",
@@ -97,19 +111,26 @@
         "-u": "Update archive with newer files",
         "-C": "Extract to a specific directory",
         "--exclude": "Exclude files matching a pattern",
-        "-p": "Preserve file permissions"
+        "-p": "Preserve file permissions",
+        "czvf": "Create gzipped archive with verbose output from file list (-c, -z, -v, -f)",
+        "xzvf": "Extract gzipped archive with verbose output (-x, -z, -v, -f)",
+        "cvf": "Create uncompressed tar archive with verbose output (-c, -v, -f)",
+        "xvf": "Extract uncompressed tar archive with verbose output (-x, -v, -f)",
+        "tf": "List table of contents of an archive file (-t, -f)"
       }
     },
     "curl": {
       "tool": "unix",
       "description": "Transfer data from or to a server using various protocols",
-      "args": { "description": "URL to connect to" },
+      "args": {
+        "description": "URL to connect to"
+      },
       "flags": {
         "-o": "Write output to a file instead of stdout",
         "-O": "Save with the remote filename",
         "-L": "Follow redirects",
         "-I": "Fetch headers only (HEAD request)",
-        "-X": "Specify HTTP method (GET, POST, PUT, DELETE...)",
+        "-X": "Specify HTTP request method to use (e.g. GET, POST, PUT, DELETE)",
         "-d": "Send data in a POST request body",
         "-H": "Add a custom HTTP header",
         "-u": "Provide user credentials (user:password)",
@@ -119,13 +140,16 @@
         "--retry": "Retry on transient errors N times",
         "-c": "Save cookies to a file",
         "-b": "Send cookies from a file",
-        "--compressed": "Request compressed response"
+        "--compressed": "Request compressed response",
+        "--request": "Specify HTTP request method to use"
       }
     },
     "ssh": {
       "tool": "unix",
       "description": "OpenSSH — secure shell remote login client",
-      "args": { "description": "[user@]hostname — the remote host to connect to" },
+      "args": {
+        "description": "[user@]hostname — the remote host to connect to"
+      },
       "flags": {
         "-p": "Port number to connect to on the remote host",
         "-i": "Identity file (private key) for authentication",
@@ -145,7 +169,9 @@
     "docker": {
       "tool": "docker",
       "description": "Docker container management CLI",
-      "args": { "description": "Subcommand and arguments (e.g., run IMAGE, ps, build PATH)" },
+      "args": {
+        "description": "Subcommand and arguments (e.g., run IMAGE, ps, build PATH)"
+      },
       "flags": {
         "run": "Create and start a container from an image",
         "ps": "List running containers (-a to show all)",
@@ -160,16 +186,52 @@
         "-d": "Detached mode — run container in background",
         "-p": "Publish container port to host: -p host:container",
         "-v": "Mount a volume: -v host_path:container_path",
-        "-e": "Set an environment variable",
+        "-e": "Set environment variables: -e KEY=value",
         "--name": "Assign a name to the container",
         "--rm": "Automatically remove container when it exits",
-        "-it": "Interactive terminal (combines -i and -t)"
+        "-it": "Interactive terminal (combines -i and -t)",
+        "compose": "Define and run multi-container Docker applications (Docker Compose v2)",
+        "up": "Build, (re)create, start, and attach to containers for a service",
+        "down": "Stop and remove containers, networks, images, and volumes",
+        "system": "Manage Docker system resources and disk space",
+        "prune": "Remove unused data (containers, networks, images, volumes)",
+        "system prune": "Remove unused data (containers, networks, images, and optionally volumes)",
+        "volume": "Manage Docker persistent volumes",
+        "network": "Manage Docker container networks",
+        "image": "Manage Docker container images",
+        "container": "Manage Docker containers",
+        "inspect": "Return low-level information on Docker objects",
+        "stats": "Display a live stream of container resource usage statistics",
+        "tag": "Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE",
+        "login": "Log in to a container registry",
+        "logout": "Log out from a container registry",
+        "start": "Start one or more stopped containers",
+        "restart": "Restart one or more containers",
+        "kill": "Kill one or more running containers with SIGKILL",
+        "attach": "Attach local standard input, output, and error streams to a running container",
+        "cp": "Copy files/folders between a container and the local filesystem",
+        "port": "List port mappings or a specific mapping for the container",
+        "-t": "Tag container image (name:tag) or allocate a pseudo-TTY",
+        "--tag": "Name and optionally a tag in the 'name:tag' format",
+        "-f": "Force action or follow log output in real time",
+        "--follow": "Follow log output in real time",
+        "--tail": "Number of lines to show from the end of the logs (e.g. --tail 100)",
+        "--volumes": "Prune anonymous volumes associated with containers",
+        "-a": "Show all containers (including stopped) or prune all unused images",
+        "--all": "Show all containers or prune all unused images",
+        "-i": "Keep STDIN open even if not attached (interactive)",
+        "--interactive": "Keep STDIN open even if not attached",
+        "--tty": "Allocate a pseudo-TTY terminal",
+        "--build": "Build images before starting containers",
+        "-af": "All and Force combined — prune all unused images without confirmation"
       }
     },
     "awk": {
       "tool": "unix",
       "description": "Pattern scanning and text processing language",
-      "args": { "description": "PROGRAM followed by FILE(s) or piped input" },
+      "args": {
+        "description": "PROGRAM followed by FILE(s) or piped input"
+      },
       "flags": {
         "-F": "Set field separator (e.g., -F: for colon-delimited)",
         "-v": "Assign a variable before execution (e.g., -v x=5)",
@@ -188,7 +250,9 @@
     "sed": {
       "tool": "unix",
       "description": "Stream editor for filtering and transforming text",
-      "args": { "description": "FILE(s) or piped input to process" },
+      "args": {
+        "description": "FILE(s) or piped input to process"
+      },
       "flags": {
         "-n": "Suppress automatic printing of pattern space",
         "-e": "Add a script/expression to be executed",
@@ -206,7 +270,9 @@
     "ps": {
       "tool": "unix",
       "description": "Report a snapshot of current running processes",
-      "args": { "description": "Optional process IDs or usernames to filter" },
+      "args": {
+        "description": "Optional process IDs or usernames to filter"
+      },
       "flags": {
         "-e": "Show all processes",
         "-f": "Full-format listing",
@@ -218,13 +284,17 @@
         "-o": "User-defined output format",
         "PID": "Process ID",
         "TTY": "Terminal associated with the process",
-        "CMD": "Command name or full command line"
+        "CMD": "Command name or full command line",
+        "aux": "Show all processes running on system with owner details (BSD style: a=all users, u=user-oriented format, x=processes without tty)",
+        "ef": "Show every process with full-format listing (System V style: -e=every, -f=full)"
       }
     },
     "kill": {
       "tool": "unix",
       "description": "Send a signal to a process",
-      "args": { "description": "PID(s) — process IDs to send signal to" },
+      "args": {
+        "description": "PID(s) — process IDs to send signal to"
+      },
       "flags": {
         "-9": "SIGKILL — forcefully terminate process immediately",
         "-15": "SIGTERM — politely ask process to terminate (default)",
@@ -237,7 +307,9 @@
     "cp": {
       "tool": "unix",
       "description": "Copy files and directories",
-      "args": { "description": "SOURCE followed by DESTINATION" },
+      "args": {
+        "description": "SOURCE followed by DESTINATION"
+      },
       "flags": {
         "-r": "Copy directories recursively",
         "-R": "Same as -r",
@@ -254,7 +326,9 @@
     "mv": {
       "tool": "unix",
       "description": "Move or rename files and directories",
-      "args": { "description": "SOURCE followed by DESTINATION" },
+      "args": {
+        "description": "SOURCE followed by DESTINATION"
+      },
       "flags": {
         "-v": "Verbose — explain what is being done",
         "-i": "Prompt before overwriting",
@@ -267,7 +341,9 @@
     "rm": {
       "tool": "unix",
       "description": "Remove files or directories",
-      "args": { "description": "FILE(s) or DIRECTORY(s) to remove" },
+      "args": {
+        "description": "FILE(s) or DIRECTORY(s) to remove"
+      },
       "flags": {
         "-r": "Remove directories and their contents recursively",
         "-R": "Same as -r",
@@ -280,7 +356,9 @@
     "mkdir": {
       "tool": "unix",
       "description": "Make directories",
-      "args": { "description": "DIRECTORY name(s) to create" },
+      "args": {
+        "description": "DIRECTORY name(s) to create"
+      },
       "flags": {
         "-p": "Make parent directories as needed, no error if existing",
         "-v": "Print a message for each created directory",
@@ -290,7 +368,9 @@
     "cat": {
       "tool": "unix",
       "description": "Concatenate files and print to standard output",
-      "args": { "description": "FILE(s) to read and print" },
+      "args": {
+        "description": "FILE(s) to read and print"
+      },
       "flags": {
         "-n": "Number all output lines",
         "-b": "Number non-blank output lines",
@@ -304,7 +384,9 @@
     "echo": {
       "tool": "unix",
       "description": "Display a line of text or variable value",
-      "args": { "description": "STRING(s) to print to stdout" },
+      "args": {
+        "description": "STRING(s) to print to stdout"
+      },
       "flags": {
         "-n": "Do not output the trailing newline",
         "-e": "Enable interpretation of escape sequences (\\n, \\t, etc.)",
@@ -314,7 +396,9 @@
     "ping": {
       "tool": "unix",
       "description": "Send ICMP ECHO_REQUEST packets to a network host",
-      "args": { "description": "HOST — hostname or IP address to ping" },
+      "args": {
+        "description": "HOST — hostname or IP address to ping"
+      },
       "flags": {
         "-c": "Stop after sending N packets",
         "-i": "Wait N seconds between sending each packet",
@@ -330,7 +414,9 @@
     "netstat": {
       "tool": "unix",
       "description": "Print network connections, routing tables, and statistics",
-      "args": { "description": "Optional filter arguments" },
+      "args": {
+        "description": "Optional filter arguments"
+      },
       "flags": {
         "-a": "Show all sockets (listening and non-listening)",
         "-t": "Show TCP connections only",
@@ -347,7 +433,9 @@
     "df": {
       "tool": "unix",
       "description": "Report file system disk space usage",
-      "args": { "description": "FILE — check the filesystem this file is on" },
+      "args": {
+        "description": "FILE — check the filesystem this file is on"
+      },
       "flags": {
         "-h": "Human-readable sizes (1K, 234M, 2G)",
         "-T": "Print filesystem type",
@@ -360,7 +448,9 @@
     "du": {
       "tool": "unix",
       "description": "Estimate file and directory space usage",
-      "args": { "description": "FILE(s) or DIRECTORY to measure" },
+      "args": {
+        "description": "FILE(s) or DIRECTORY to measure"
+      },
       "flags": {
         "-h": "Human-readable sizes",
         "-s": "Summary only — total size of each argument",
@@ -375,7 +465,9 @@
     "top": {
       "tool": "unix",
       "description": "Display Linux tasks and system resource usage in real-time",
-      "args": { "description": "No required arguments — runs interactively" },
+      "args": {
+        "description": "No required arguments — runs interactively"
+      },
       "flags": {
         "-d": "Delay between updates in seconds",
         "-n": "Number of iterations before exiting",
@@ -388,7 +480,9 @@
     "head": {
       "tool": "unix",
       "description": "Output the first part of files",
-      "args": { "description": "FILE(s) to read from" },
+      "args": {
+        "description": "FILE(s) to read from"
+      },
       "flags": {
         "-n": "Print the first N lines (default: 10)",
         "-c": "Print the first N bytes",
@@ -399,7 +493,9 @@
     "tail": {
       "tool": "unix",
       "description": "Output the last part of files",
-      "args": { "description": "FILE(s) to read from" },
+      "args": {
+        "description": "FILE(s) to read from"
+      },
       "flags": {
         "-n": "Print the last N lines (default: 10)",
         "-c": "Print the last N bytes",
@@ -412,7 +508,9 @@
     "wc": {
       "tool": "unix",
       "description": "Print line, word, and byte counts for files",
-      "args": { "description": "FILE(s) to count" },
+      "args": {
+        "description": "FILE(s) to count"
+      },
       "flags": {
         "-l": "Print the line count only",
         "-w": "Print the word count only",
@@ -424,7 +522,9 @@
     "sort": {
       "tool": "unix",
       "description": "Sort lines of text files",
-      "args": { "description": "FILE(s) to sort" },
+      "args": {
+        "description": "FILE(s) to sort"
+      },
       "flags": {
         "-r": "Reverse the result of comparisons",
         "-n": "Compare according to string numerical value",
@@ -441,7 +541,9 @@
     "uniq": {
       "tool": "unix",
       "description": "Report or omit repeated lines",
-      "args": { "description": "INPUT FILE (usually from sort)" },
+      "args": {
+        "description": "INPUT FILE (usually from sort)"
+      },
       "flags": {
         "-c": "Prefix lines by number of occurrences",
         "-d": "Only print duplicate lines",
@@ -454,7 +556,9 @@
     "xargs": {
       "tool": "unix",
       "description": "Build and execute command lines from standard input",
-      "args": { "description": "COMMAND to execute with arguments from stdin" },
+      "args": {
+        "description": "COMMAND to execute with arguments from stdin"
+      },
       "flags": {
         "-n": "Use at most N arguments per command line",
         "-I": "Replace occurrences of REPLACE-STR in command (e.g., -I {})",
@@ -469,7 +573,9 @@
     "chown": {
       "tool": "unix",
       "description": "Change file owner and group",
-      "args": { "description": "OWNER[:GROUP] followed by FILE(s)" },
+      "args": {
+        "description": "OWNER[:GROUP] followed by FILE(s)"
+      },
       "flags": {
         "-R": "Operate recursively on directories",
         "-v": "Verbose — output each file processed",
@@ -481,7 +587,9 @@
     "ln": {
       "tool": "unix",
       "description": "Make links between files",
-      "args": { "description": "TARGET followed by LINK_NAME" },
+      "args": {
+        "description": "TARGET followed by LINK_NAME"
+      },
       "flags": {
         "-s": "Create a symbolic (soft) link instead of a hard link",
         "-f": "Remove existing destination files",
@@ -494,7 +602,9 @@
     "cron": {
       "tool": "unix",
       "description": "Daemon to execute scheduled commands (crontab entries)",
-      "args": { "description": "No direct arguments — managed via crontab -e" },
+      "args": {
+        "description": "No direct arguments — managed via crontab -e"
+      },
       "flags": {
         "minute": "0-59: minute of the hour",
         "hour": "0-23: hour of the day",
@@ -510,7 +620,9 @@
     "crontab": {
       "tool": "unix",
       "description": "Manage per-user scheduled cron jobs",
-      "args": { "description": "Optional cron file to install" },
+      "args": {
+        "description": "Optional cron file to install"
+      },
       "flags": {
         "-e": "Edit the current user's crontab in $EDITOR",
         "-l": "List the current user's crontab",
@@ -522,7 +634,9 @@
     "wget": {
       "tool": "unix",
       "description": "Non-interactive network downloader",
-      "args": { "description": "URL(s) to download" },
+      "args": {
+        "description": "URL(s) to download"
+      },
       "flags": {
         "-O": "Save file with a different name",
         "-o": "Log all messages to a file instead of stderr",
@@ -546,7 +660,9 @@
     "rsync": {
       "tool": "unix",
       "description": "Fast, versatile file copying and synchronisation tool",
-      "args": { "description": "SOURCE and DESTINATION (local or user@host:path)" },
+      "args": {
+        "description": "SOURCE and DESTINATION (local or user@host:path)"
+      },
       "flags": {
         "-a": "Archive mode: preserves permissions, timestamps, symlinks, owner (-rlptgoD)",
         "-v": "Verbose — show files being transferred",
@@ -576,7 +692,9 @@
     "scp": {
       "tool": "unix",
       "description": "Securely copy files between hosts over SSH",
-      "args": { "description": "SOURCE and DESTINATION — either can be [user@]host:path" },
+      "args": {
+        "description": "SOURCE and DESTINATION — either can be [user@]host:path"
+      },
       "flags": {
         "-r": "Recursively copy entire directories",
         "-P": "Port to connect to on the remote host",
@@ -593,7 +711,9 @@
     "tee": {
       "tool": "unix",
       "description": "Read from stdin and write to both stdout and files simultaneously",
-      "args": { "description": "FILE(s) to write output to (in addition to stdout)" },
+      "args": {
+        "description": "FILE(s) to write output to (in addition to stdout)"
+      },
       "flags": {
         "-a": "Append to files instead of overwriting",
         "-i": "Ignore the SIGINT signal (interrupt)"
@@ -602,7 +722,9 @@
     "cut": {
       "tool": "unix",
       "description": "Extract sections from each line of a file or stdin",
-      "args": { "description": "FILE(s) or piped input to process" },
+      "args": {
+        "description": "FILE(s) or piped input to process"
+      },
       "flags": {
         "-d": "Use DELIM as the field delimiter instead of TAB",
         "-f": "Select specific fields (e.g., -f1,3 or -f2-4)",
@@ -615,7 +737,9 @@
     "tr": {
       "tool": "unix",
       "description": "Translate or delete characters from stdin",
-      "args": { "description": "SET1 — characters to translate from; SET2 — characters to translate to" },
+      "args": {
+        "description": "SET1 — characters to translate from; SET2 — characters to translate to"
+      },
       "flags": {
         "-d": "Delete characters in SET1 (no SET2 needed)",
         "-s": "Squeeze repeated characters in SET1 into a single character",
@@ -632,7 +756,9 @@
     "date": {
       "tool": "unix",
       "description": "Print or set the system date and time",
-      "args": { "description": "Optional format string starting with + (e.g., +%Y-%m-%d)" },
+      "args": {
+        "description": "Optional format string starting with + (e.g., +%Y-%m-%d)"
+      },
       "flags": {
         "-u": "Print or set time in UTC",
         "-d": "Display a specific date string instead of now",
@@ -654,7 +780,9 @@
     "uname": {
       "tool": "unix",
       "description": "Print system and kernel information",
-      "args": { "description": "No required arguments" },
+      "args": {
+        "description": "No required arguments"
+      },
       "flags": {
         "-a": "Print all information",
         "-s": "Print kernel name",
@@ -669,7 +797,9 @@
     "which": {
       "tool": "unix",
       "description": "Locate the executable file for a command",
-      "args": { "description": "COMMAND name(s) to locate" },
+      "args": {
+        "description": "COMMAND name(s) to locate"
+      },
       "flags": {
         "-a": "Print all matching executables in PATH, not just the first"
       }
@@ -677,7 +807,9 @@
     "env": {
       "tool": "unix",
       "description": "Print environment variables or run a command in a modified environment",
-      "args": { "description": "VAR=VALUE pairs followed by optional COMMAND to run" },
+      "args": {
+        "description": "VAR=VALUE pairs followed by optional COMMAND to run"
+      },
       "flags": {
         "-i": "Start with an empty environment",
         "-u": "Remove a variable from the environment",
@@ -687,7 +819,9 @@
     "export": {
       "tool": "unix",
       "description": "Set or export an environment variable to child processes",
-      "args": { "description": "NAME=VALUE pairs to export, or variable names to mark for export" },
+      "args": {
+        "description": "NAME=VALUE pairs to export, or variable names to mark for export"
+      },
       "flags": {
         "-n": "Remove export attribute from variable (do not export)",
         "-p": "Print all exported variables and their values",
@@ -697,7 +831,9 @@
     "free": {
       "tool": "unix",
       "description": "Display amount of free and used memory in the system",
-      "args": { "description": "No required arguments" },
+      "args": {
+        "description": "No required arguments"
+      },
       "flags": {
         "-h": "Human-readable output (KB, MB, GB)",
         "-m": "Display values in mebibytes",
@@ -712,7 +848,9 @@
     "lsof": {
       "tool": "unix",
       "description": "List open files — including network connections, sockets, and pipes",
-      "args": { "description": "Optional file, directory, or device to filter by" },
+      "args": {
+        "description": "Optional file, directory, or device to filter by"
+      },
       "flags": {
         "-i": "List network files (use -i :PORT to filter by port)",
         "-p": "List files for a specific PID",
@@ -730,7 +868,9 @@
     "ss": {
       "tool": "unix",
       "description": "Socket statistics — modern replacement for netstat",
-      "args": { "description": "Optional filter expressions" },
+      "args": {
+        "description": "Optional filter expressions"
+      },
       "flags": {
         "-t": "Show TCP sockets",
         "-u": "Show UDP sockets",
@@ -753,7 +893,9 @@
     "watch": {
       "tool": "unix",
       "description": "Execute a command repeatedly, displaying its output",
-      "args": { "description": "COMMAND to run repeatedly" },
+      "args": {
+        "description": "COMMAND to run repeatedly"
+      },
       "flags": {
         "-n": "Update interval in seconds (default: 2)",
         "-d": "Highlight differences between successive updates",
@@ -768,7 +910,9 @@
     "dig": {
       "tool": "unix",
       "description": "DNS lookup utility — query DNS name servers",
-      "args": { "description": "[@server] name [type] — domain to look up and optional record type" },
+      "args": {
+        "description": "[@server] name [type] — domain to look up and optional record type"
+      },
       "flags": {
         "+short": "Print only the terse answer (just the IP)",
         "+noall": "Clear all display flags",
@@ -794,7 +938,9 @@
     "ip": {
       "tool": "unix",
       "description": "Show/manipulate routing, network devices, interfaces, and tunnels",
-      "args": { "description": "Object (addr, link, route, neigh, etc.) and command" },
+      "args": {
+        "description": "Object (addr, link, route, neigh, etc.) and command"
+      },
       "flags": {
         "addr": "Show or manipulate IP addresses on interfaces",
         "link": "Show or manipulate network interfaces",
@@ -820,7 +966,9 @@
     "zip": {
       "tool": "unix",
       "description": "Package and compress files into a ZIP archive",
-      "args": { "description": "ZIPFILE followed by FILE(s) to add" },
+      "args": {
+        "description": "ZIPFILE followed by FILE(s) to add"
+      },
       "flags": {
         "-r": "Recurse into directories",
         "-e": "Encrypt the archive with a password",
@@ -839,7 +987,9 @@
     "unzip": {
       "tool": "unix",
       "description": "Extract files from a ZIP archive",
-      "args": { "description": "ZIPFILE to extract, with optional FILES to extract selectively" },
+      "args": {
+        "description": "ZIPFILE to extract, with optional FILES to extract selectively"
+      },
       "flags": {
         "-d": "Extract into a specific destination directory",
         "-l": "List archive contents without extracting",
@@ -857,7 +1007,9 @@
     "vim": {
       "tool": "unix",
       "description": "Vi IMproved — powerful terminal text editor",
-      "args": { "description": "FILE(s) to open for editing" },
+      "args": {
+        "description": "FILE(s) to open for editing"
+      },
       "flags": {
         "-n": "No swap file (useful for network filesystems)",
         "-R": "Read-only mode (view mode)",
@@ -880,7 +1032,9 @@
     "nano": {
       "tool": "unix",
       "description": "Simple, beginner-friendly terminal text editor",
-      "args": { "description": "FILE(s) to open for editing" },
+      "args": {
+        "description": "FILE(s) to open for editing"
+      },
       "flags": {
         "-l": "Show line numbers",
         "-v": "View mode (read-only)",
@@ -902,7 +1056,9 @@
     "htop": {
       "tool": "unix",
       "description": "Interactive process viewer with mouse support",
-      "args": { "description": "No required arguments — runs interactively" },
+      "args": {
+        "description": "No required arguments — runs interactively"
+      },
       "flags": {
         "-u": "Show processes for a specific user only",
         "-p": "Show only listed PIDs",
@@ -922,7 +1078,9 @@
     "journalctl": {
       "tool": "unix",
       "description": "Query and display logs from the systemd journal",
-      "args": { "description": "Optional unit name or match expression to filter by" },
+      "args": {
+        "description": "Optional unit name or match expression to filter by"
+      },
       "flags": {
         "-u": "Show logs for a specific systemd unit (service)",
         "-f": "Follow mode — tail the journal in real time",
@@ -946,7 +1104,9 @@
     "git": {
       "tool": "git",
       "description": "Distributed version control system",
-      "args": { "description": "Git subcommand (commit, push, pull, clone, etc.)" },
+      "args": {
+        "description": "Git subcommand (commit, push, pull, clone, etc.)"
+      },
       "flags": {
         "commit": "Record staged changes as a new snapshot in history",
         "push": "Upload local commits to a remote repository",
@@ -954,7 +1114,7 @@
         "fetch": "Download remote changes without merging",
         "clone": "Clone a remote repository into a new directory",
         "checkout": "Switch branches or restore working tree files",
-        "switch": "Switch branches (modern replacement for checkout -b)",
+        "switch": "Switch branches safely without modifying files (Git 2.23+)",
         "branch": "List, create, or delete branches",
         "merge": "Join two or more development histories together",
         "rebase": "Reapply commits on top of another base tip",
@@ -968,7 +1128,7 @@
         "tag": "Create, list, or delete tags",
         "cherry-pick": "Apply the changes from a specific commit",
         "bisect": "Binary search through history to find a bad commit",
-        "remote": "Manage connections to remote repositories",
+        "remote": "Manage set of tracked remote repositories",
         "init": "Initialise a new empty Git repository",
         "rm": "Remove files from the working tree and index",
         "show": "Show a Git object (commit, tag, tree, blob)",
@@ -998,8 +1158,8 @@
         "config": "Get or set repository or global configuration values",
         "clean": "Remove untracked files from the working tree",
         "reflog": "Show a log of all HEAD movements — essential for recovery",
-        "worktree": "Manage multiple working trees from one repository",
-        "submodule": "Manage submodules embedded in the repository",
+        "worktree": "Manage multiple working trees attached to the same repository",
+        "submodule": "Initialize, update or inspect nested submodules",
         "shortlog": "Summarise git log output grouped by author",
         "archive": "Export a tree or commit as a tar/zip archive",
         "blame": "Show which commit last modified each line of a file",
@@ -1014,13 +1174,28 @@
         "--global": "Apply config to the global (~/.gitconfig) scope",
         "--local": "Apply config to the repository (.git/config) scope",
         "--list": "List all configuration variables",
-        "-fd": "Force-delete a branch (shorthand combination)"
+        "-fd": "Force-delete a branch (shorthand combination)",
+        "restore": "Restore working tree files or discard unstaged local changes (Git 2.23+)",
+        "stash pop": "Apply the topmost stashed change and remove it from the stash list",
+        "pop": "Apply and remove from stash list",
+        "remote add": "Add a new remote repository with a name and URL",
+        "-n": "Limit number of commits shown (e.g. -n 5) or perform dry-run",
+        "--pretty": "Pretty-print the contents of commit logs in a specified format",
+        "--format": "Specify pretty-print format template for commit logs",
+        "--since": "Show commits more recent than a specific date or time",
+        "--until": "Show commits older than a specific date or time",
+        "--author": "Limit commits to those matching the given author regex pattern",
+        "--set-upstream": "Set default remote tracking branch for future push/pull",
+        "-c": "Create a new branch and switch to it (used with switch/checkout)",
+        "--staged": "Restore staged contents from the index rather than working tree"
       }
     },
     "terraform": {
       "tool": "terraform",
       "description": "Infrastructure as Code tool by HashiCorp",
-      "args": { "description": "Terraform subcommand (init, plan, apply, destroy, etc.)" },
+      "args": {
+        "description": "Terraform subcommand (init, plan, apply, destroy, etc.)"
+      },
       "flags": {
         "init": "Initialise a Terraform working directory (downloads providers)",
         "plan": "Preview changes Terraform will make to infrastructure",
@@ -1040,10 +1215,10 @@
         "show": "Show the current state or a plan file",
         "force-unlock": "Release a stuck state lock",
         "-auto-approve": "Skip interactive approval prompt on apply/destroy",
-        "-var": "Set a single input variable value (-var 'key=value')",
-        "-var-file": "Load variable values from a .tfvars file",
+        "-var": "Set a Terraform variable directly on the command line",
+        "-var-file": "Load variable values from the given .tfvars file",
         "-out": "Save plan to a file for later apply",
-        "-target": "Focus apply/plan on a specific resource",
+        "-target": "Target a specific resource, module, or collection for plan/apply/destroy",
         "-parallelism": "Limit number of concurrent operations (default: 10)",
         "-refresh=false": "Skip refreshing state before plan/apply",
         "-reconfigure": "Reconfigure the backend, ignoring any saved config",
@@ -1051,27 +1226,32 @@
         "-compact-warnings": "Show warnings in a more compact format",
         "-json": "Output in machine-readable JSON format",
         "-lock=false": "Disable state locking (use with caution)",
-        "-lock-timeout": "Duration to retry acquiring state lock",
+        "-lock-timeout": "Duration to retry acquiring a state lock before failing",
         "-input=false": "Disable interactive prompts",
-        "-no-color": "Disable color in output"
+        "-no-color": "Disable color in output",
+        "-recursive": "Process files in subdirectories recursively",
+        "select": "Select an existing Terraform workspace",
+        "list": "List resources in Terraform state or available workspaces"
       }
     },
     "kubectl": {
       "tool": "kubernetes",
       "description": "Kubernetes command-line tool — control clusters",
-      "args": { "description": "kubectl subcommand (get, apply, describe, delete, etc.)" },
+      "args": {
+        "description": "kubectl subcommand (get, apply, describe, delete, etc.)"
+      },
       "flags": {
         "get": "Display one or many resources",
         "apply": "Apply a configuration to a resource from a file or stdin",
         "delete": "Delete resources by filenames, resource names, or labels",
-        "describe": "Show detailed state of one or more resources",
+        "describe": "Show detailed state of one or more Kubernetes resources",
         "create": "Create a resource from a file or stdin",
         "edit": "Edit a resource in the default editor",
         "exec": "Execute a command inside a running container",
         "logs": "Print logs from a container in a pod",
-        "port-forward": "Forward local port(s) to a pod",
-        "scale": "Scale a Deployment, ReplicaSet, or StatefulSet",
-        "rollout": "Manage rollouts (status, history, undo, restart)",
+        "port-forward": "Forward one or more local ports to a pod or service",
+        "scale": "Set a new size for a Deployment, ReplicaSet, or StatefulSet",
+        "rollout": "Manage the rollout of a resource (deployment, daemonset, statefulset)",
         "patch": "Update fields of a resource using JSON/YAML patch",
         "label": "Add or update labels on a resource",
         "annotate": "Add or update annotations on a resource",
@@ -1081,9 +1261,9 @@
         "top": "Show CPU and memory usage of nodes or pods",
         "config": "Modify kubeconfig (current context, clusters, users)",
         "cluster-info": "Display cluster endpoint information",
-        "drain": "Safely evict all pods from a node for maintenance",
-        "cordon": "Mark a node as unschedulable",
-        "uncordon": "Mark a node as schedulable",
+        "drain": "Drain node in preparation for maintenance",
+        "cordon": "Mark node as unschedulable",
+        "uncordon": "Mark node as schedulable",
         "taint": "Update taints on one or more nodes",
         "-n": "Namespace to operate in",
         "--namespace": "Namespace to operate in (long form)",
@@ -1096,17 +1276,17 @@
         "--grace-period": "Period in seconds before forceful termination",
         "--watch": "Watch for changes to the listed resources",
         "-it": "Interactive terminal for exec",
-        "--tail": "Number of lines of log output to show",
+        "--tail": "Lines of recent log file to display (e.g. --tail 50)",
         "--since": "Show logs since this duration (e.g., 5m, 1h)",
         "--previous": "Print logs from previous container instance",
         "--record": "Record current command in the resource annotation",
         "--context": "The kubeconfig context to use",
         "--kubeconfig": "Path to the kubeconfig file",
         "-A": "Shorthand for --all-namespaces",
-        "wait": "Wait until a specific condition is met on a resource",
-        "api-resources": "List all supported API resource types in the cluster",
+        "wait": "Experimental: Wait for a specific condition on one or many resources",
+        "api-resources": "Print the supported API resources on the server",
         "api-versions": "List all supported API versions in the cluster",
-        "explain": "Show documentation for a resource field (e.g., kubectl explain pod.spec)",
+        "explain": "Get documentation for a Kubernetes resource or its fields",
         "proxy": "Run a proxy to the Kubernetes API server on localhost",
         "certificate": "Approve or deny pending certificate signing requests",
         "auth": "Inspect or reconcile RBAC authorisation",
@@ -1119,13 +1299,26 @@
         "--selector": "Same as -l: filter resources by label selector",
         "--show-labels": "Show all labels as the last column in output",
         "--sort-by": "Sort list results by a JSONPath expression",
-        "--field-selector": "Filter resources by field value (e.g., status.phase=Running)"
+        "--field-selector": "Filter resources by field value (e.g., status.phase=Running)",
+        "restart": "Restart a resource rollout",
+        "rollout restart": "Restart a resource rollout (triggers a rolling update with new pods)",
+        "--replicas": "Number of desired replicas for scaling (e.g. --replicas=3)",
+        "--follow": "Specify if the logs should be streamed",
+        "--": "End-of-options delimiter; separates kubectl flags from the target container command",
+        "deployment": "Kubernetes Deployment workload controller",
+        "pod": "Kubernetes Pod workload unit",
+        "pods": "Kubernetes Pods workload units",
+        "svc": "Kubernetes Service network abstraction",
+        "service": "Kubernetes Service network abstraction",
+        "services": "Kubernetes Services network abstractions"
       }
     },
     "npm": {
       "tool": "npm",
       "description": "Node Package Manager — manage JavaScript dependencies",
-      "args": { "description": "npm subcommand (install, run, build, publish, etc.)" },
+      "args": {
+        "description": "npm subcommand (install, run, build, publish, etc.)"
+      },
       "flags": {
         "install": "Install all dependencies listed in package.json",
         "i": "Alias for install",
@@ -1138,7 +1331,7 @@
         "publish": "Publish a package to the npm registry",
         "init": "Create a new package.json interactively",
         "audit": "Scan dependencies for known vulnerabilities",
-        "audit fix": "Automatically fix audit vulnerabilities",
+        "audit fix": "Automatically install compatible updates to vulnerable packages",
         "list": "List installed packages",
         "ls": "Alias for list",
         "outdated": "Check which packages are outdated",
@@ -1146,24 +1339,27 @@
         "link": "Symlink a local package for development",
         "pack": "Create a tarball of the package",
         "version": "Bump the package version",
-        "cache clean": "Delete cached package data",
+        "cache clean": "Delete all data out of the npm cache folder",
         "--save": "Save to dependencies in package.json (default in npm 5+)",
-        "--save-dev": "Save to devDependencies in package.json",
-        "-D": "Short for --save-dev",
+        "--save-dev": "Save installed packages as devDependencies in package.json",
+        "-D": "Save installed packages as devDependencies in package.json",
         "--save-optional": "Save to optionalDependencies",
-        "--global": "Install package globally (system-wide)",
-        "-g": "Short for --global",
+        "--global": "Install packages globally in system npm directory",
+        "-g": "Install packages globally in system npm directory",
         "--production": "Install only production dependencies (not devDependencies)",
         "--legacy-peer-deps": "Bypass peer dependency conflicts (npm 7+)",
         "--force": "Force install, ignoring cache",
         "--prefix": "Set install directory prefix",
-        "--registry": "Use a specific registry URL"
+        "--registry": "Use a specific registry URL",
+        "--access": "Set package visibility: --access=public or --access=restricted"
       }
     },
     "systemctl": {
       "tool": "systemctl",
       "description": "Control the systemd system and service manager",
-      "args": { "description": "Subcommand followed by unit name (e.g., start nginx)" },
+      "args": {
+        "description": "Subcommand followed by unit name (e.g., start nginx)"
+      },
       "flags": {
         "start": "Start (activate) one or more units",
         "stop": "Stop (deactivate) one or more units",
@@ -1200,7 +1396,9 @@
     "jq": {
       "tool": "jq",
       "description": "Lightweight command-line JSON processor",
-      "args": { "description": "JQ filter expression followed by JSON file or piped input" },
+      "args": {
+        "description": "JQ filter expression followed by JSON file or piped input"
+      },
       "flags": {
         ".": "Identity filter — output the input unchanged",
         ".field": "Extract value of a named object field",
@@ -1247,7 +1445,9 @@
     "openssl": {
       "tool": "openssl",
       "description": "OpenSSL — cryptography toolkit and TLS/SSL library CLI",
-      "args": { "description": "OpenSSL subcommand (genrsa, req, x509, s_client, enc, etc.)" },
+      "args": {
+        "description": "OpenSSL subcommand (genrsa, req, x509, s_client, enc, etc.)"
+      },
       "flags": {
         "genrsa": "Generate an RSA private key",
         "genpkey": "Generate a private key (supports RSA, EC, Ed25519)",
@@ -1272,25 +1472,28 @@
         "-out": "Output filename",
         "-days": "Certificate validity period in days",
         "-subj": "Subject name in one line (avoids interactive prompts)",
-        "-nodes": "Do not encrypt the private key (no DES)",
+        "-nodes": "Do not encrypt the private key with a passphrase (no DES)",
         "-noout": "Do not output the encoded certificate or key",
         "-text": "Print the certificate in human-readable text form",
-        "-sha256": "Use SHA-256 digest",
+        "-sha256": "Use the SHA-256 cryptographic hash algorithm",
         "-sha512": "Use SHA-512 digest",
         "-connect": "Specify host:port for s_client",
         "-verify": "Verification depth for certificate chain",
-        "-CAfile": "Trusted CA certificate file",
+        "-CAfile": "File containing trusted Certificate Authority (CA) certificates in PEM format",
         "-servername": "Set SNI hostname for TLS connection",
         "-passin": "Input file passphrase source",
         "-passout": "Output file passphrase source",
         "rsa:4096": "RSA key with 4096-bit modulus",
-        "rsa:2048": "RSA key with 2048-bit modulus"
+        "rsa:2048": "RSA key with 2048-bit modulus",
+        "-sign": "Sign a message digest using the specified private key file"
       }
     },
     "docker-compose": {
       "tool": "docker",
       "description": "Define and run multi-container Docker apps (Compose v1 CLI)",
-      "args": { "description": "Compose subcommand (up, down, build, logs, exec, etc.)" },
+      "args": {
+        "description": "Compose subcommand (up, down, build, logs, exec, etc.)"
+      },
       "flags": {
         "up": "Create and start containers defined in docker-compose.yml",
         "down": "Stop and remove containers, networks, and volumes",
@@ -1324,7 +1527,9 @@
     "aws": {
       "tool": "aws",
       "description": "Amazon Web Services command-line interface",
-      "args": { "description": "Service and subcommand (e.g., aws s3 ls, aws ec2 describe-instances)" },
+      "args": {
+        "description": "Service and subcommand (e.g., aws s3 ls, aws ec2 describe-instances)"
+      },
       "flags": {
         "s3": "S3 object storage commands (ls, cp, mv, rm, sync, mb, rb)",
         "ec2": "Elastic Compute Cloud — manage instances, AMIs, security groups",
@@ -1363,13 +1568,31 @@
         "--debug": "Show detailed debug output and HTTP calls",
         "--no-paginate": "Disable automatic pagination of results",
         "--color": "Toggle colorized output: on, off, auto",
-        "--cli-input-json": "Read parameters from a JSON file"
+        "--cli-input-json": "Read parameters from a JSON file",
+        "describe-instances": "Describe EC2 virtual machine instances and their state",
+        "list-tasks": "List ECS container tasks in a cluster",
+        "update-kubeconfig": "Update local kubeconfig file with EKS cluster credentials",
+        "get-caller-identity": "Return details about IAM credentials used to authenticate",
+        "tail": "Stream logs from CloudWatch log group in real time",
+        "get-secret-value": "Retrieve decrypted secret value from AWS Secrets Manager",
+        "list-secrets": "List secrets stored in AWS Secrets Manager",
+        "list-clusters": "List ECS or EKS clusters",
+        "list-functions": "List Lambda functions in AWS account",
+        "invoke": "Invoke a Lambda function",
+        "--cluster": "Specify ECS or EKS cluster name",
+        "--name": "Specify resource name",
+        "--follow": "Stream / follow log output continuously",
+        "--secret-id": "ARN or name of secret in Secrets Manager",
+        "--recursive": "Recursively operate on all objects under specified S3 path",
+        "--delete": "Delete destination files that do not exist in source during sync"
       }
     },
     "az": {
       "tool": "azure",
       "description": "Microsoft Azure command-line interface",
-      "args": { "description": "Service group and command (e.g., az vm list, az group create)" },
+      "args": {
+        "description": "Service group and command (e.g., az vm list, az group create)"
+      },
       "flags": {
         "login": "Authenticate to Azure (browser or service principal)",
         "logout": "Log out from Azure",
@@ -1417,13 +1640,28 @@
         "--no-wait": "Do not wait for long-running operations to finish",
         "--debug": "Show detailed debug and HTTP request logs",
         "--verbose": "Show verbose logging",
-        "--only-show-errors": "Only show errors (suppress warnings)"
+        "--only-show-errors": "Only show errors (suppress warnings)",
+        "blob": "Manage Azure storage blob containers and files",
+        "upload": "Upload a file or resource to Azure",
+        "download": "Download a file or resource from Azure",
+        "secret": "Manage secrets in Azure Key Vault",
+        "secret show": "Get a secret value from Azure Key Vault",
+        "build": "Queue a container build in Azure Container Registry (ACR)",
+        "-f": "File path to upload or template configuration",
+        "--account-name": "Storage account name",
+        "-c": "Container name in storage account",
+        "--container-name": "Container name in storage account",
+        "--vault-name": "Name of the Azure Key Vault",
+        "--registry": "Name of the Azure Container Registry",
+        "--image": "Name and tag of the container image"
       }
     },
     "gcloud": {
       "tool": "gcloud",
       "description": "Google Cloud SDK command-line interface",
-      "args": { "description": "Service group and command (e.g., gcloud compute instances list)" },
+      "args": {
+        "description": "Service group and command (e.g., gcloud compute instances list)"
+      },
       "flags": {
         "init": "Initialise gcloud config — set account, project, region",
         "auth": "Manage authentication credentials and service accounts",
@@ -1466,20 +1704,520 @@
         "--configuration": "Named gcloud config to use",
         "--impersonate-service-account": "Run as a service account (requires iam.serviceAccountTokenCreator)",
         "--no-user-output-enabled": "Suppress all user output",
-        "--log-http": "Log all HTTP requests and responses (for debugging)"
+        "--log-http": "Log all HTTP requests and responses (for debugging)",
+        "deploy": "Deploy an application or container service",
+        "read": "Read and filter log entries from Google Cloud Logging",
+        "set": "Set a Google Cloud SDK configuration property value",
+        "project": "Target the active Google Cloud project property",
+        "--image": "Container image reference to deploy",
+        "--runtime": "Runtime environment for Cloud Function (e.g. nodejs20, python311)",
+        "--trigger-http": "Configure Cloud Function to trigger on incoming HTTP requests",
+        "--limit": "Maximum number of resources or log entries to return"
+      }
+    },
+    "sudo": {
+      "tool": "unix",
+      "description": "Execute a command as the superuser (root) or another specified user",
+      "args": {
+        "description": "Command and arguments to execute with elevated privileges"
+      },
+      "flags": {
+        "-u": "Run the command as the specified user instead of root",
+        "-g": "Run the command with the specified group identity",
+        "-i": "Run a login shell with the target user's environment",
+        "-s": "Run the shell specified by SHELL environment variable",
+        "-E": "Preserve existing user environment variables in elevated environment",
+        "--preserve-env": "Preserve specific or all environment variables",
+        "-k": "Invalidate cached credentials (reset authorization timestamp)",
+        "-b": "Run the command asynchronously in the background",
+        "-v": "Update cached credentials timestamp without running a command",
+        "-l": "List allowed and forbidden commands for the invoking user",
+        "-e": "Edit one or more files as target user (sudoedit)"
+      }
+    },
+    "doas": {
+      "tool": "unix",
+      "description": "Execute commands as another user (lightweight sudo alternative)",
+      "args": {
+        "description": "Command and arguments to execute with elevated privileges"
+      },
+      "flags": {
+        "-u": "Execute command as the specified user",
+        "-s": "Execute shell",
+        "-n": "Non-interactive mode (fail if password prompt is required)"
+      }
+    },
+    "python": {
+      "tool": "unix",
+      "description": "Python language interpreter",
+      "args": {
+        "description": "Script file or module name to execute"
+      },
+      "flags": {
+        "-m": "Run library module as a script (e.g. -m venv, -m http.server, -m pytest)",
+        "-c": "Execute the given Python program string",
+        "-v": "Verbose — trace import statements as modules are loaded",
+        "-O": "Enable basic bytecode optimizations (removes assert statements)",
+        "-B": "Don't write .pyc files on import",
+        "-u": "Force unbuffered binary stdout and stderr",
+        "-i": "Inspect interactively after running script",
+        "-W": "Warning control (e.g. -W ignore, -W error)",
+        "--version": "Display Python version and exit",
+        "-V": "Display Python version and exit"
+      }
+    },
+    "python3": {
+      "tool": "unix",
+      "description": "Python 3 language interpreter",
+      "args": {
+        "description": "Script file or module name to execute"
+      },
+      "flags": {
+        "-m": "Run library module as a script (e.g. -m venv, -m http.server, -m pytest)",
+        "-c": "Execute the given Python program string",
+        "-v": "Verbose — trace import statements as modules are loaded",
+        "-O": "Enable basic bytecode optimizations (removes assert statements)",
+        "-B": "Don't write .pyc files on import",
+        "-u": "Force unbuffered binary stdout and stderr",
+        "-i": "Inspect interactively after running script",
+        "-W": "Warning control (e.g. -W ignore, -W error)",
+        "--version": "Display Python version and exit",
+        "-V": "Display Python version and exit"
+      }
+    },
+    "node": {
+      "tool": "unix",
+      "description": "Node.js JavaScript server runtime environment",
+      "args": {
+        "description": "JavaScript file to execute"
+      },
+      "flags": {
+        "-e": "Evaluate the following JavaScript code string",
+        "--eval": "Evaluate the following JavaScript code string",
+        "-p": "Evaluate code and print the result to stdout",
+        "--print": "Evaluate code and print the result to stdout",
+        "-r": "Preload the specified module at startup before running script",
+        "--require": "Preload the specified module at startup before running script",
+        "--watch": "Restart process automatically when imported files change",
+        "--inspect": "Activate V8 inspector agent on port 9229",
+        "--inspect-brk": "Activate V8 inspector and break at start of user script",
+        "--max-old-space-size": "Set maximum memory allocation for V8 heap in megabytes",
+        "--env-file": "Load environment variables from the specified file",
+        "--version": "Print Node.js version",
+        "-v": "Print Node.js version"
+      }
+    },
+    "pip": {
+      "tool": "unix",
+      "description": "Package installer for Python (PyPI)",
+      "args": {
+        "description": "Pip subcommand and package names"
+      },
+      "flags": {
+        "install": "Install packages from PyPI or local wheels",
+        "uninstall": "Uninstall specified packages",
+        "list": "List installed Python packages",
+        "freeze": "Output installed packages in requirements.txt format",
+        "show": "Show detailed metadata about installed packages",
+        "check": "Verify installed packages have compatible dependencies",
+        "search": "Search PyPI for packages",
+        "cache": "Inspect and manage pip's package cache",
+        "-r": "Install packages from the specified requirements file",
+        "--requirement": "Install packages from the specified requirements file",
+        "-U": "Upgrade specified packages to latest available version",
+        "--upgrade": "Upgrade specified packages to latest available version",
+        "--user": "Install packages to user's local directory (~/.local)",
+        "--no-cache-dir": "Disable cache and download packages directly",
+        "-e": "Install a project in editable development mode",
+        "--editable": "Install a project in editable development mode",
+        "--index-url": "Base URL of Python Package Index",
+        "--extra-index-url": "Extra URLs of package indexes to use in addition to --index-url",
+        "--outdated": "List installed packages that have newer versions available on PyPI"
+      }
+    },
+    "pip3": {
+      "tool": "unix",
+      "description": "Package installer for Python 3 (PyPI)",
+      "args": {
+        "description": "Pip subcommand and package names"
+      },
+      "flags": {
+        "install": "Install packages from PyPI or local wheels",
+        "uninstall": "Uninstall specified packages",
+        "list": "List installed Python packages",
+        "freeze": "Output installed packages in requirements.txt format",
+        "show": "Show detailed metadata about installed packages",
+        "check": "Verify installed packages have compatible dependencies",
+        "cache": "Inspect and manage pip's package cache",
+        "-r": "Install packages from the specified requirements file",
+        "--requirement": "Install packages from the specified requirements file",
+        "-U": "Upgrade specified packages to latest available version",
+        "--upgrade": "Upgrade specified packages to latest available version",
+        "--user": "Install packages to user's local directory (~/.local)",
+        "--no-cache-dir": "Disable cache and download packages directly",
+        "-e": "Install a project in editable development mode",
+        "--outdated": "List installed packages that have newer versions available on PyPI"
+      }
+    },
+    "pnpm": {
+      "tool": "npm",
+      "description": "Fast, disk space efficient package manager for JavaScript",
+      "args": {
+        "description": "pnpm command and package arguments"
+      },
+      "flags": {
+        "install": "Install all dependencies for a project",
+        "i": "Alias for install",
+        "add": "Add dependencies to package.json and install them",
+        "remove": "Remove packages from dependencies",
+        "rm": "Alias for remove",
+        "run": "Run an arbitrary package script",
+        "test": "Run test script defined in package.json",
+        "build": "Run build script defined in package.json",
+        "dev": "Run development script",
+        "exec": "Execute a shell command in scope of project",
+        "dlx": "Fetch a package from registry and run its default binary without installing",
+        "-D": "Save package as development dependency",
+        "--save-dev": "Save package as development dependency",
+        "-g": "Install package globally",
+        "--global": "Install package globally",
+        "-w": "Run package command in root of workspace",
+        "--workspace-root": "Run package command in root of workspace",
+        "--filter": "Filter packages in monorepo workspace"
+      }
+    },
+    "yarn": {
+      "tool": "npm",
+      "description": "Fast, reliable, and secure JavaScript dependency management",
+      "args": {
+        "description": "Yarn command and package arguments"
+      },
+      "flags": {
+        "add": "Install a package and add to dependencies",
+        "remove": "Remove a package from dependencies",
+        "install": "Install all dependencies listed in package.json",
+        "run": "Run a defined package script",
+        "build": "Run build script",
+        "test": "Run test script",
+        "dev": "Run development script",
+        "-D": "Save package as development dependency",
+        "--dev": "Save package as development dependency",
+        "-g": "Install package globally",
+        "--global": "Install package globally"
+      }
+    },
+    "bun": {
+      "tool": "npm",
+      "description": "Fast all-in-one JavaScript runtime, bundler, and package manager",
+      "args": {
+        "description": "Bun command and arguments"
+      },
+      "flags": {
+        "run": "Run JavaScript/TypeScript file or package script",
+        "install": "Install dependencies from package.json",
+        "i": "Alias for install",
+        "add": "Add a package to package.json dependencies",
+        "remove": "Remove a package from dependencies",
+        "build": "Bundle TypeScript or JavaScript code for production",
+        "test": "Run test runner with Jest-compatible API",
+        "dev": "Run project in development mode",
+        "-d": "Save package as development dependency",
+        "--dev": "Save package as development dependency",
+        "-g": "Install package globally",
+        "--global": "Install package globally",
+        "--hot": "Enable hot module reloading for code changes",
+        "--watch": "Automatically restart process on file changes"
+      }
+    },
+    "cargo": {
+      "tool": "unix",
+      "description": "Rust package manager and compiler driver",
+      "args": {
+        "description": "Cargo subcommand and arguments"
+      },
+      "flags": {
+        "build": "Compile local package and all of its dependencies",
+        "run": "Run a binary or example of the local package",
+        "test": "Execute all unit and integration tests",
+        "check": "Analyze package and report errors without code generation",
+        "add": "Add dependencies to Cargo.toml manifest file",
+        "remove": "Remove dependencies from Cargo.toml manifest file",
+        "install": "Build and install a Rust binary locally",
+        "uninstall": "Remove an installed Rust binary",
+        "update": "Update dependencies recorded in Cargo.lock",
+        "publish": "Package and upload this package to crates.io",
+        "fmt": "Format Rust source code using rustfmt",
+        "clippy": "Run Rust linter for common mistakes and improvements",
+        "--release": "Build artifacts in release mode with full optimizations",
+        "--bin": "Target specified binary target",
+        "--features": "Space or comma separated list of features to activate",
+        "--all-features": "Activate all available features",
+        "--target": "Build for the specified target triple architecture"
+      }
+    },
+    "go": {
+      "tool": "unix",
+      "description": "Go programming language command-line tool",
+      "args": {
+        "description": "Go subcommand and arguments"
+      },
+      "flags": {
+        "run": "Compile and run Go programs",
+        "build": "Compile Go packages and dependencies",
+        "install": "Compile and install packages and dependencies",
+        "test": "Automate testing of Go packages",
+        "get": "Add dependencies to current module and install them",
+        "mod": "Module maintenance operations",
+        "mod tidy": "Add missing and remove unused modules from go.mod",
+        "mod download": "Download modules to local cache",
+        "fmt": "Gofmt (reformat) package sources",
+        "vet": "Report likely mistakes in packages",
+        "clean": "Remove object files and cached files",
+        "-v": "Verbose output: print names of packages as they are compiled",
+        "-race": "Enable data race detection",
+        "-o": "Specify output file name"
+      }
+    },
+    "apt": {
+      "tool": "unix",
+      "description": "Advanced Package Tool — Debian/Ubuntu package manager",
+      "args": {
+        "description": "Package management operation and package names"
+      },
+      "flags": {
+        "install": "Install one or more software packages",
+        "remove": "Remove packages but keep configuration files",
+        "purge": "Remove packages and delete their configuration files",
+        "update": "Download package lists and check for newer versions",
+        "upgrade": "Upgrade all installed packages to newest versions",
+        "dist-upgrade": "Upgrade packages and handle changing dependencies",
+        "autoremove": "Remove packages installed automatically that are no longer needed",
+        "search": "Search package names and descriptions",
+        "show": "Display detailed package records",
+        "clean": "Erase downloaded package archive files (.deb)",
+        "-y": "Automatic yes to prompts; assume yes to all questions",
+        "--yes": "Automatic yes to prompts; assume yes to all questions",
+        "-q": "Quiet mode: produce output suitable for logging",
+        "--quiet": "Quiet mode: produce output suitable for logging",
+        "--fix-broken": "Attempt to correct broken dependencies"
+      }
+    },
+    "apt-get": {
+      "tool": "unix",
+      "description": "APT package handling utility — command-line interface",
+      "args": {
+        "description": "Package management operation and package names"
+      },
+      "flags": {
+        "install": "Install one or more software packages",
+        "remove": "Remove packages but keep configuration files",
+        "purge": "Remove packages and delete their configuration files",
+        "update": "Download package lists and check for newer versions",
+        "upgrade": "Upgrade all installed packages to newest versions",
+        "dist-upgrade": "Upgrade packages and handle changing dependencies",
+        "autoremove": "Remove packages installed automatically that are no longer needed",
+        "clean": "Erase downloaded package archive files (.deb)",
+        "-y": "Automatic yes to prompts; assume yes to all questions",
+        "--yes": "Automatic yes to prompts; assume yes to all questions"
+      }
+    },
+    "brew": {
+      "tool": "unix",
+      "description": "The Missing Package Manager for macOS and Linux",
+      "args": {
+        "description": "Formula or cask operation"
+      },
+      "flags": {
+        "install": "Install a formula or cask package",
+        "uninstall": "Uninstall a formula or cask package",
+        "remove": "Alias for uninstall",
+        "update": "Fetch newest version of Homebrew and all formulae",
+        "upgrade": "Upgrade outdated formulae and casks",
+        "search": "Search for formulae and casks matching text or regex",
+        "info": "Display information about a formula or cask",
+        "list": "List all installed formulae and casks",
+        "cleanup": "Remove stale lock files and outdated downloads",
+        "doctor": "Check system for potential configuration problems",
+        "cask": "Homebrew Cask: macOS GUI application manager",
+        "--cask": "Treat package as a GUI application cask",
+        "--formula": "Treat package as a CLI formula",
+        "--force": "Force an installation or operation"
+      }
+    },
+    "helm": {
+      "tool": "kubernetes",
+      "description": "The Kubernetes package manager — manage Helm charts",
+      "args": {
+        "description": "Helm chart command and release name"
+      },
+      "flags": {
+        "install": "Install a Helm chart onto a Kubernetes cluster",
+        "upgrade": "Upgrade a release to a new version of a chart",
+        "uninstall": "Uninstall a release from Kubernetes",
+        "delete": "Alias for uninstall",
+        "list": "List deployed releases",
+        "ls": "Alias for list",
+        "repo": "Manage chart repositories",
+        "repo add": "Add a chart repository",
+        "repo update": "Update information of available charts from repositories",
+        "search": "Search for a keyword in chart repositories",
+        "template": "Render chart templates locally and display output",
+        "status": "Display status of a named release",
+        "rollback": "Roll back a release to a previous revision",
+        "-n": "Specify Kubernetes namespace for release",
+        "--namespace": "Specify Kubernetes namespace for release",
+        "--create-namespace": "Create namespace if it does not exist",
+        "-f": "Specify values in a YAML file or URL",
+        "--values": "Specify values in a YAML file or URL",
+        "--set": "Set values on the command line",
+        "--atomic": "If set, installation process purges chart on failure",
+        "--wait": "Wait until all Pods are in ready state before marking release successful",
+        "--install": "If a release by this name doesn't already exist, run an install"
+      }
+    },
+    "gh": {
+      "tool": "git",
+      "description": "GitHub CLI — take GitHub to the command line",
+      "args": {
+        "description": "GitHub resource (pr, issue, repo, etc.)"
+      },
+      "flags": {
+        "pr": "Manage pull requests",
+        "pr create": "Create a pull request on GitHub",
+        "pr checkout": "Check out a pull request in Git",
+        "pr list": "List pull requests in repository",
+        "pr view": "Display title, body, and metadata for a pull request",
+        "pr merge": "Merge a pull request on GitHub",
+        "issue": "Manage issues",
+        "issue create": "Create a new issue on GitHub",
+        "issue list": "List issues in repository",
+        "issue view": "View an issue",
+        "repo": "Manage repositories",
+        "repo clone": "Clone a GitHub repository locally",
+        "repo create": "Create a new GitHub repository",
+        "auth": "Authenticate gh with GitHub",
+        "auth login": "Log in to a GitHub account",
+        "auth status": "View authentication status",
+        "release": "Manage releases",
+        "release create": "Create a new release",
+        "--web": "Open in web browser",
+        "-w": "Open in web browser",
+        "--title": "Title for the pull request or issue",
+        "-t": "Title for the pull request or issue"
+      }
+    },
+    "ffmpeg": {
+      "tool": "unix",
+      "description": "Fast audio and video converter and streaming tool",
+      "args": {
+        "description": "Input and output media files"
+      },
+      "flags": {
+        "-i": "Specify input file url or path",
+        "-vn": "Disable video recording / strip video stream",
+        "-an": "Disable audio recording / strip audio stream",
+        "-c:v": "Select video codec (e.g. -c:v libx264, -c:v copy)",
+        "-c:a": "Select audio codec (e.g. -c:a aac, -c:a copy)",
+        "-c": "Codec selection for streams",
+        "-b:v": "Set video bitrate (e.g. -b:v 2M)",
+        "-b:a": "Set audio bitrate (e.g. -b:a 192k)",
+        "-r": "Set frame rate (fps)",
+        "-s": "Set frame size / resolution (e.g. 1920x1080)",
+        "-ss": "Seek to timestamp before starting (e.g. -ss 00:01:30)",
+        "-to": "Stop writing stream after reaching timestamp",
+        "-t": "Limit duration of data read from input",
+        "-y": "Overwrite output files without asking",
+        "-n": "Do not overwrite output files",
+        "-crf": "Constant Rate Factor quality (0-51, lower is better quality)",
+        "-preset": "Encoding speed vs compression ratio preset (ultrafast to veryslow)"
+      }
+    },
+    "ssh-keygen": {
+      "tool": "unix",
+      "description": "OpenSSH authentication key pair generation and management",
+      "args": {
+        "description": "Key options and output file"
+      },
+      "flags": {
+        "-t": "Specify type of key to create (rsa, ed25519, ecdsa, dsa)",
+        "-b": "Specify number of bits in key (e.g. 4096 for RSA)",
+        "-C": "Provide a new comment / label for key (often email)",
+        "-f": "Specify filename of the key file",
+        "-N": "Provide new passphrase for key",
+        "-p": "Change passphrase of private key file",
+        "-y": "Read private key file and print OpenSSH public key to stdout",
+        "-R": "Remove all keys belonging to hostname from known_hosts file"
       }
     }
   },
   "pipe_operators": {
-    "|": { "name": "Pipe", "description": "Passes stdout of the left command as stdin to the right command" },
-    ">": { "name": "Redirect stdout", "description": "Redirects stdout to a file, overwriting it" },
-    ">>": { "name": "Append stdout", "description": "Redirects stdout to a file, appending to it" },
-    "<": { "name": "Redirect stdin", "description": "Reads stdin from a file" },
-    "2>": { "name": "Redirect stderr", "description": "Redirects stderr to a file" },
-    "2>&1": { "name": "Merge stderr→stdout", "description": "Redirects stderr to the same destination as stdout" },
-    "&": { "name": "Background", "description": "Runs the command in the background" },
-    "&&": { "name": "AND operator", "description": "Runs the right command only if the left command succeeds (exit 0)" },
-    "||": { "name": "OR operator", "description": "Runs the right command only if the left command fails (non-zero exit)" },
-    ";": { "name": "Command separator", "description": "Runs commands sequentially regardless of exit status" }
+    "|": {
+      "name": "Pipe",
+      "description": "Passes stdout of the left command as stdin to the right command"
+    },
+    ">": {
+      "name": "Redirect stdout",
+      "description": "Redirects stdout to a file, overwriting it"
+    },
+    ">>": {
+      "name": "Append stdout",
+      "description": "Redirects stdout to a file, appending to it"
+    },
+    "<": {
+      "name": "Redirect stdin",
+      "description": "Reads stdin from a file"
+    },
+    "2>": {
+      "name": "Redirect stderr",
+      "description": "Redirects stderr to a file"
+    },
+    "2>&1": {
+      "name": "Merge stderr→stdout",
+      "description": "Redirects stderr to the same destination as stdout"
+    },
+    "&": {
+      "name": "Background",
+      "description": "Runs the command in the background"
+    },
+    "&&": {
+      "name": "AND operator",
+      "description": "Runs the right command only if the left command succeeds (exit 0)"
+    },
+    "||": {
+      "name": "OR operator",
+      "description": "Runs the right command only if the left command fails (non-zero exit)"
+    },
+    ";": {
+      "name": "Command separator",
+      "description": "Runs commands sequentially regardless of exit status"
+    },
+    "&>": {
+      "name": "Stdout & Stderr Redirect",
+      "description": "Redirects both standard output (stdout) and standard error (stderr) to a file, overwriting it"
+    },
+    ">&": {
+      "name": "Stdout & Stderr Redirect",
+      "description": "Redirects both standard output (stdout) and standard error (stderr) to a file"
+    },
+    "1>": {
+      "name": "Stdout Redirect",
+      "description": "Redirects standard output (stdout) to a file, overwriting it"
+    },
+    "1>&2": {
+      "name": "Stdout to Stderr Redirect",
+      "description": "Redirects standard output (fd 1) into standard error (fd 2)"
+    },
+    "|&": {
+      "name": "Pipe Stdout & Stderr",
+      "description": "Pipes both standard output and standard error from the left command into stdin of the right command"
+    },
+    "<<<": {
+      "name": "Here-String",
+      "description": "Feeds the string on the right directly into standard input (stdin) of the command"
+    },
+    "<<": {
+      "name": "Here-Document (Heredoc)",
+      "description": "Feeds multiline text stream into standard input (stdin) up to a delimiter word"
+    }
   }
 }
