@@ -3,9 +3,9 @@
  * Tests tokenization, parsing, flag expansion, and hazard scanning
  */
 
-const fs = require('fs');
-const assert = require('assert');
-const path = require('path');
+const fs = require('node:fs');
+const assert = require('node:assert');
+const path = require('node:path');
 
 // Mock browser environment for parser module
 const commandsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'commands.json'), 'utf8'));
